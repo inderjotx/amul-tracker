@@ -1,5 +1,9 @@
 import { storeService } from "@/services/store"
 import { redisService, type RedisService } from "@/services/redis"
+import { type QueueService, queueService } from "./queue"
+import { db, type DBClient } from "@/server/db"
+import { track } from "@/server/db/schema"
+import { eq, and } from "drizzle-orm"
 
 export type ProductData = Record<string, Array<{ _id: string, available: boolean }>>
 type StoreService = typeof storeService
@@ -15,9 +19,11 @@ class ProductService {
 
 
 
-    constructor(private storeService: StoreService, private redisService: RedisService) {
+    constructor(private storeService: StoreService, private redisService: RedisService, private queueService: QueueService, private db: DBClient) {
         this.storeService = storeService
         this.redisService = redisService
+        this.queueService = queueService
+        this.db = db
     }
 
 
@@ -51,6 +57,36 @@ class ProductService {
     }
 
 
+    async sendProductNotification(productData: ProductData) {
+
+        await Promise.all(
+            Object.entries(productData).flatMap(([substoreId, products]) =>
+                products.map((product) =>
+                    this.getTrackingRequests(substoreId, product._id)
+                )
+            )
+        );
+    }
+
+
+    async getTrackingRequests(subStoreId: string, productId: string) {
+
+        const trackingRequests = await this.db.query.track.findMany({
+            where: and(
+                eq(track.substoreId, subStoreId),
+                eq(track.productId, productId)
+            ),
+            with: {
+                user: true,
+                product: true,
+            }
+        });
+
+        await this.queueService.sendNotification(trackingRequests)
+        return trackingRequests;
+    }
+
+
 
     async getAllSubStoreProducts() {
         const storeData = this.storeService.getStoreData();
@@ -67,6 +103,8 @@ class ProductService {
         }
         return result as ProductData;
     }
+
+
 
     async getProducts(substoreId: string) {
         try {
@@ -86,4 +124,4 @@ class ProductService {
     }
 }
 
-export const productService = new ProductService(storeService, redisService)
+export const productService = new ProductService(storeService, redisService, queueService, db)
