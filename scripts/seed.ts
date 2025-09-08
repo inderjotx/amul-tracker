@@ -24,7 +24,7 @@ async function seedProducts() {
         // Prepare products data
         const products = data.data.map((item) => ({
             alias: item.alias,
-            external_product_id: item._id,
+            id: item._id,
             sku: item.sku,
             name: item.name,
             description: item.metafields?.shot_description ?? item.metafields?.benefits ?? "",

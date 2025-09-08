@@ -2,7 +2,7 @@ import { z } from "zod";
 import { eq, and, sql } from "drizzle-orm";
 
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "@/server/api/trpc";
-import { product, track } from "@/server/db/schema";
+import { product, track, user } from "@/server/db/schema";
 
 export const productsRouter = createTRPCRouter({
   // Get all products (public)
@@ -55,10 +55,20 @@ export const productsRouter = createTRPCRouter({
   track: protectedProcedure
     .input(z.object({
       productId: z.string(),
-      substoreId: z.string().default("default-store")
     }))
     .mutation(async ({ ctx, input }) => {
+
       // Check if already tracked
+
+      const currentUser = await ctx.db
+        .select()
+        .from(user)
+        .where(eq(user.id, ctx.user.id));
+
+      if (!currentUser?.[0]?.substoreId) {
+        throw new Error("User does not have a substore");
+      }
+
       const existingTrack = await ctx.db
         .select()
         .from(track)
@@ -66,7 +76,7 @@ export const productsRouter = createTRPCRouter({
           and(
             eq(track.userId, ctx.user.id),
             eq(track.productId, input.productId),
-            eq(track.substoreId, input.substoreId)
+            eq(track.substoreId, currentUser?.[0]?.substoreId)
           )
         )
         .limit(1);
@@ -81,7 +91,7 @@ export const productsRouter = createTRPCRouter({
         .values({
           userId: ctx.user.id,
           productId: input.productId,
-          substoreId: input.substoreId,
+          substoreId: currentUser?.[0]?.substoreId,
         })
         .returning();
 

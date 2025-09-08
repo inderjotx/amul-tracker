@@ -1,5 +1,8 @@
 import { type Config } from "drizzle-kit";
 
+
+import { config as dotEnvConfig } from 'dotenv';
+dotEnvConfig();
 import { env } from "@/env";
 
 export default {

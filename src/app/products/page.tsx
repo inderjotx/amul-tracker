@@ -316,14 +316,6 @@ function ProductsContent() {
                   </span>
 
                   <div className="flex items-center gap-2">
-                    <Button
-                      onClick={() => handleBuy(product.alias)}
-                      className="bg-blue-600 text-white hover:bg-blue-700"
-                      disabled={isProcessing}
-                    >
-                      <ExternalLink className="mr-1 h-3 w-3" />
-                      Buy
-                    </Button>
                     {isTracked ? (
                       <Button
                         onClick={() => trackId && handleUntrack(trackId)}
@@ -337,14 +329,23 @@ function ProductsContent() {
                     ) : (
                       <Button
                         onClick={() => handleTrack(product.id)}
-                        variant="outline"
-                        className="border-pink-200 text-pink-600 hover:bg-pink-50"
+                        variant="default"
+                        className="shadow-xl shadow-teal-200"
                         disabled={isProcessing}
                       >
                         <Heart className="mr-1 h-3 w-3" />
                         {isProcessing ? "..." : "Track"}
                       </Button>
                     )}
+                    <Button
+                      onClick={() => handleBuy(product.alias)}
+                      variant="outline"
+                      className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                      disabled={isProcessing}
+                    >
+                      <ExternalLink className="mr-1 h-3 w-3" />
+                      Buy
+                    </Button>
                   </div>
                 </div>
               </CardContent>

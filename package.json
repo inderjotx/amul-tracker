@@ -12,6 +12,7 @@
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx scripts/seed.ts",
     "test": "tsx scripts/test-service.ts",
+    "test:email": "tsx worker/test-email-template.ts",
     "dev": "next dev --turbo",
     "worker:dev": "cd worker && pnpm dev",
     "worker:start": "cd worker && pnpm start",

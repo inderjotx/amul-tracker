@@ -3,6 +3,8 @@ import {
 } from 'better-auth';
 import { db } from '@/server/db';
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { config as dotEnvConfig } from 'dotenv';
+dotEnvConfig();
 import { env } from '@/env';
 
 export const auth = betterAuth({

@@ -68,9 +68,9 @@ export const verification = pgTable("verification", {
 
 
 export const product = pgTable("product", {
-    id: text("id").primaryKey().default(sql`gen_random_uuid()`),
+    id: text("id").primaryKey().notNull(),
     alias: text("alias").notNull(),
-    "external_product_id": text("external_product_id").notNull(),
+    // "external_product_id": text("external_product_id").notNull(),
     sku: text("sku").notNull(),
     name: text("name").notNull(),
     description: text("description"),

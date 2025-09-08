@@ -27,6 +27,11 @@ class ProductService {
     }
 
 
+    async cron() {
+        const data = await this.getProductRecentlyComeInStock()
+        await this.sendProductNotification(data)
+    }
+
 
     async getProductRecentlyComeInStock() {
 
@@ -82,7 +87,13 @@ class ProductService {
             }
         });
 
-        await this.queueService.sendNotification(trackingRequests)
+
+        if (trackingRequests.length > 0) {
+            await this.queueService.sendNotification({ trackingRequests })
+            console.log("Tracking requests sent -----------")
+        } else {
+            console.log("No tracking requests -----------")
+        }
         return trackingRequests;
     }
 
