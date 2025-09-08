@@ -2,37 +2,70 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useState } from "react";
-import { Loader2, Key } from "lucide-react";
-import { signIn } from "@/lib/auth-client";
-import Link from "next/link";
+import { signIn } from "@/auth/client";
 import { cn } from "@/lib/utils";
 
-export default function SignIn() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+interface SignInDialogProps {
+  triggerText?: string;
+  triggerVariant?:
+    | "default"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | "link";
+  triggerClassName?: string;
+}
+
+export default function SignInDialog({
+  triggerText = "Sign In",
+  triggerVariant = "default",
+  triggerClassName,
+}: SignInDialogProps) {
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const handleSignIn = async () => {
+    await signIn.social(
+      {
+        provider: "google",
+        callbackURL: "/dashboard",
+      },
+      {
+        onRequest: (ctx) => {
+          setLoading(true);
+        },
+        onResponse: (ctx) => {
+          setLoading(false);
+          // setOpen(false);
+        },
+      },
+    );
+  };
 
   return (
-    <Card className="max-w-md">
-      <CardHeader>
-        <CardTitle className="text-lg md:text-xl">Sign In</CardTitle>
-        <CardDescription className="text-xs md:text-sm">
-          Enter your email below to login to your account
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-4">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant={"default"} className={triggerClassName}>
+          {triggerText}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-lg md:text-xl">Sign In</DialogTitle>
+          <DialogDescription className="text-xs md:text-sm">
+            Enter your email below to login to your account
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
           <div
             className={cn(
               "flex w-full items-center gap-2",
@@ -43,22 +76,7 @@ export default function SignIn() {
               variant="outline"
               className={cn("w-full gap-2")}
               disabled={loading}
-              onClick={async () => {
-                await signIn.social(
-                  {
-                    provider: "google",
-                    callbackURL: "/dashboard",
-                  },
-                  {
-                    onRequest: (ctx) => {
-                      setLoading(true);
-                    },
-                    onResponse: (ctx) => {
-                      setLoading(false);
-                    },
-                  },
-                );
-              }}
+              onClick={handleSignIn}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -87,7 +105,7 @@ export default function SignIn() {
             </Button>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -12,7 +12,7 @@ export const auth = betterAuth({
             clientSecret: env.GOOGLE_CLIENT_SECRET
         }
     },
-    adapter: drizzleAdapter(db, {
+    database: drizzleAdapter(db, {
         provider: "pg",
     }),
 });
