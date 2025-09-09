@@ -30,6 +30,7 @@ class ProductService {
     async cron() {
         const data = await this.getProductRecentlyComeInStock()
         await this.sendProductNotification(data)
+        return
     }
 
 
@@ -56,7 +57,14 @@ class ProductService {
             })
         })
 
-        await this.redisService.setPrevProductData(productData)
+
+        if (
+            Object.keys(productRecentlyComeInStock)
+                .map((substoreId) => productRecentlyComeInStock[substoreId]?.length ?? 0)
+                .reduce((a, b) => a + b, 0) > 0
+        ) {
+            await this.redisService.setPrevProductData(productData)
+        }
 
         return productRecentlyComeInStock
     }
@@ -71,6 +79,7 @@ class ProductService {
                 )
             )
         );
+        return
     }
 
 

@@ -103,7 +103,6 @@ function ProductsContent() {
     trackMutation.mutate(
       {
         productId,
-        substoreId: "default-store",
       },
       {
         onSettled: () => {

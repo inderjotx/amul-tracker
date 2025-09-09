@@ -1,0 +1,75 @@
+# Use the official Node.js 22 image as base
+FROM node:22-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+# Build stage
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# Set environment variable to skip validation during build
+ENV SKIP_ENV_VALIDATION=true
+ENV DATABASE_URL=postgresql://placeholder:placeholder@placeholder:5432/placeholder
+ENV NODE_ENV=production
+ENV GOOGLE_CLIENT_ID=placeholder
+ENV GOOGLE_CLIENT_SECRET=placeholder
+ENV BETTER_AUTH_SECRET=placeholder
+ENV REDIS_URL=redis://placeholder:6379
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Build the application (needed for TypeScript compilation)
+RUN pnpm build
+
+# Production image for cron job
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 cronuser
+
+# Copy only the necessary files for the cron job
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/src/services ./src/services
+COPY --from=builder /app/src/server ./src/server
+COPY --from=builder /app/src/utils ./src/utils
+COPY --from=builder /app/src/env.js ./src/env.js
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/tsconfig.json ./tsconfig.json
+COPY --from=builder /app/drizzle ./drizzle
+COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
+
+# Install cron
+RUN apk add --no-cache dcron
+
+# Create a simple cron script
+RUN echo '#!/bin/sh' > /app/cron-script.sh && \
+    echo 'cd /app' >> /app/cron-script.sh && \
+    echo 'npx tsx src/services/cronjob.ts' >> /app/cron-script.sh && \
+    chmod +x /app/cron-script.sh
+
+# Create cron job entry (runs every 2 minutes)
+RUN echo '*/2 * * * * /app/cron-script.sh >> /var/log/cron.log 2>&1' > /etc/crontabs/root
+
+# Create log file
+RUN touch /var/log/cron.log
+
+USER root
+
+# Start cron daemon and tail the log
+CMD ["sh", "-c", "crond -f -l 2 & tail -f /var/log/cron.log"]

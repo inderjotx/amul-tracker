@@ -3,8 +3,15 @@ import { Worker } from 'bullmq';
 import IORedis from "ioredis";
 import { emailTemplateEngine, type TrackingRequest } from './email-template-engine';
 import { sendEmail } from './send-email';
+import dotenv from 'dotenv'
 
-export const client = new IORedis("redis://:secret123@localhost:6379", { maxRetriesPerRequest: null });
+dotenv.config();
+
+if (!process.env.REDIS_URL) {
+    throw new Error('REDIS_URL is not set');
+}
+
+export const client = new IORedis(process.env.REDIS_URL, { maxRetriesPerRequest: null });
 export type RedisClient = typeof client;
 
 const worker = new Worker(

@@ -13,7 +13,7 @@ export const env = createEnv({
       .default("development"),
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
-
+    BETTER_AUTH_SECRET: z.string(),
     REDIS_URL: z.string(),
   },
 
@@ -38,6 +38,7 @@ export const env = createEnv({
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     REDIS_URL: process.env.REDIS_URL,
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
