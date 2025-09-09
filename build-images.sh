@@ -69,13 +69,10 @@ echo -e "  ${REGISTRY}/${MIGRATION_IMAGE}:latest"
 echo ""
 
 # Optional: Push to registry
-if [ "$2" = "--push" ]; then
-    echo -e "${YELLOW}Pushing images to registry...${NC}"
-    docker push "${REGISTRY}/${NEXTJS_IMAGE}:latest"
-    docker push "${REGISTRY}/${WORKER_IMAGE}:latest"
-    docker push "${REGISTRY}/${CRON_IMAGE}:latest"
-    docker push "${REGISTRY}/${MIGRATION_IMAGE}:latest"
-    echo -e "${GREEN}All images pushed successfully!${NC}"
-fi
-
+echo -e "${YELLOW}Pushing images to registry...${NC}"
+docker push "${REGISTRY}/${NEXTJS_IMAGE}:latest"
+docker push "${REGISTRY}/${WORKER_IMAGE}:latest"
+docker push "${REGISTRY}/${CRON_IMAGE}:latest"
+docker push "${REGISTRY}/${MIGRATION_IMAGE}:latest"
+echo -e "${GREEN}All images pushed successfully!${NC}"
 echo -e "${GREEN}Build completed!${NC}"
