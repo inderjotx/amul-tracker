@@ -1,5 +1,5 @@
-import { client, type RedisClient } from "@/utils/redis";
-import type { ProductData } from "@/services/product";
+import { client, type RedisClient } from "../utils/redis";
+import type { ProductData } from "./product";
 
 
 export class RedisService {

@@ -5,13 +5,13 @@ import { db } from '@/server/db';
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { config as dotEnvConfig } from 'dotenv';
 dotEnvConfig();
-import { env } from '@/env';
 
 export const auth = betterAuth({
+    baseURL: process.env.NEXT_PUBLIC_APP_URL!,
     socialProviders: {
         google: {
-            clientId: env.GOOGLE_CLIENT_ID,
-            clientSecret: env.GOOGLE_CLIENT_SECRET
+            clientId: process.env.GOOGLE_CLIENT_ID!,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!
         }
     },
     database: drizzleAdapter(db, {

@@ -1,6 +1,6 @@
 
 import { Queue } from 'bullmq';
-import { client } from '@/utils/redis';
+import { client } from '../utils/redis';
 
 
 

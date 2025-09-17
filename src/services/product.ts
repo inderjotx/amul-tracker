@@ -1,8 +1,8 @@
-import { storeService } from "@/services/store"
-import { redisService, type RedisService } from "@/services/redis"
+import { storeService } from "./store"
+import { redisService, type RedisService } from "./redis"
 import { type QueueService, queueService } from "./queue"
-import { db, type DBClient } from "@/server/db"
-import { track } from "@/server/db/schema"
+import { db, type DBClient } from "../server/db"
+import { track } from "../server/db/schema"
 import { eq, and } from "drizzle-orm"
 
 export type ProductData = Record<string, Array<{ _id: string, available: boolean }>>
@@ -72,13 +72,14 @@ class ProductService {
 
     async sendProductNotification(productData: ProductData) {
 
-        await Promise.all(
+        const trackingRequests = await Promise.all(
             Object.entries(productData).flatMap(([substoreId, products]) =>
                 products.map((product) =>
                     this.getTrackingRequests(substoreId, product._id)
                 )
             )
         );
+        console.log("trackingRequests", trackingRequests)
         return
     }
 

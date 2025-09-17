@@ -22,12 +22,6 @@ COPY . .
 
 # Set environment variable to skip validation during build
 ENV SKIP_ENV_VALIDATION=true
-ENV DATABASE_URL=postgresql://placeholder:placeholder@placeholder:5432/placeholder
-ENV NODE_ENV=production
-ENV GOOGLE_CLIENT_ID=placeholder
-ENV GOOGLE_CLIENT_SECRET=placeholder
-ENV BETTER_AUTH_SECRET=placeholder
-ENV REDIS_URL=redis://placeholder:6379
 
 # Build the application
 RUN npm install -g pnpm

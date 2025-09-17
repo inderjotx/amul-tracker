@@ -1,16 +1,18 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+// import { drizzle } from "drizzle-orm/postgres-js";
+import { drizzle } from "drizzle-orm/neon-http";
+// import postgres from "postgres";
 import * as schema from "@/server/db/schema";
 import { product } from "@/server/db/schema";
-import { sql } from "drizzle-orm";
 import data from "./data.json";
+import { neon } from "@neondatabase/serverless";
+import { eq, isNotNull } from "drizzle-orm";
 
 // Create database connection directly without env validation
-const conn = postgres(process.env.DATABASE_URL ?? "");
-const db = drizzle(conn, { schema: schema });
+const sql = neon(process.env.DATABASE_URL!);
+const db = drizzle({ client: sql, schema: schema });
 
 
 async function seedProducts() {
@@ -19,7 +21,7 @@ async function seedProducts() {
     try {
         // Clear existing products
         console.log("Clearing existing products...");
-        await db.delete(product).where(sql`1=1`);
+        await db.delete(product).where(isNotNull(product.id));
 
         // Prepare products data
         const products = data.data.map((item) => ({
@@ -49,11 +51,9 @@ async function seedProducts() {
         console.log(`📊 Total products in database: ${count.length}`);
 
         // Close database connection
-        await conn.end();
 
     } catch (error) {
         console.error("❌ Error seeding products:", error);
-        await conn.end();
         process.exit(1);
     }
 }
