@@ -1,7 +1,8 @@
 import { storeService } from "./store"
 import { redisService, type RedisService } from "./redis"
-import { type QueueService, queueService } from "./queue"
+// import { type QueueService, queueService } from "./queue"
 import { db, type DBClient } from "../server/db"
+import { notificationService, type NotificationService } from "./aws-sns"
 import { track } from "../server/db/schema"
 import { eq, and } from "drizzle-orm"
 
@@ -19,10 +20,10 @@ class ProductService {
 
 
 
-    constructor(private storeService: StoreService, private redisService: RedisService, private queueService: QueueService, private db: DBClient) {
+    constructor(private storeService: StoreService, private redisService: RedisService, private notificationService: NotificationService, private db: DBClient) {
         this.storeService = storeService
         this.redisService = redisService
-        this.queueService = queueService
+        this.notificationService = notificationService
         this.db = db
     }
 
@@ -99,7 +100,7 @@ class ProductService {
 
 
         if (trackingRequests.length > 0) {
-            await this.queueService.sendNotification({ trackingRequests })
+            await this.notificationService.sendNotification({ trackingRequests })
             console.log("Tracking requests sent -----------")
         } else {
             console.log("No tracking requests -----------")
@@ -145,4 +146,4 @@ class ProductService {
     }
 }
 
-export const productService = new ProductService(storeService, redisService, queueService, db)
+export const productService = new ProductService(storeService, redisService, notificationService, db)

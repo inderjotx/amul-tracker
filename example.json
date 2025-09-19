@@ -1,0 +1,39 @@
+{
+    "Records": [
+        {
+            "body": {
+                "trackingRequests": [
+                    {
+                        "id": "28c6515a-6f8c-46d9-b8f6-dcd48efb6c09",
+                        "userId": "3WvOqg6XQNCvPT4GAhxThEcekvgiXn9m",
+                        "productId": "6707b9eaec74db003270ba80",
+                        "substoreId": "66505ff3998183e1b1935d0e",
+                        "user": {
+                            "id": "3WvOqg6XQNCvPT4GAhxThEcekvgiXn9m",
+                            "name": "Inderjot Singh",
+                            "email": "inderjotsingh141@gmail.com",
+                            "emailVerified": true,
+                            "image": "https://lh3.googleusercontent.com/a/ACg8ocJMwEgteYy7NZfknkn2oLIGuih_R6BpwFJf_gwYBd9d-BXmBg=s96-c",
+                            "createdAt": "2025-09-17T04:26:31.558Z",
+                            "pincode": "144002",
+                            "substoreId": "66505ff3998183e1b1935d0e",
+                            "substoreName": "punjab",
+                            "city": null,
+                            "address": {},
+                            "updatedAt": "2025-09-17T04:26:31.558Z"
+                        },
+                        "product": {
+                            "id": "6707b9eaec74db003270ba80",
+                            "alias": "amul-kool-protein-milkshake-or-arabica-coffee-180-ml-or-pack-of-30",
+                            "sku": "DBDCP43_30",
+                            "name": "Amul Kool Protein Milkshake | Arabica Coffee, 180 mL | Pack of 30",
+                            "description": "Amul Kool Protein Arabica Coffee Milkshake with 10 g of milk protein",
+                            "image": "https://shop.amul.com/s/62fa94df8c13af2e242eba16/6707ba5cee5d0400352b44a5/01-hero-image-multipack_protein-milkshake-coffee.png",
+                            "usualPrice": 1200
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

@@ -1,21 +1,24 @@
 {
     "name": "amul-tracker-worker",
     "version": "0.1.0",
-    "private": true,
     "type": "module",
+    "private": true,
     "scripts": {
         "dev": "tsx watch worker.ts",
         "start": "tsx worker.ts",
+        "build:aws": "tsc ",
         "test:email": "tsx test-email-template.ts"
     },
     "dependencies": {
         "bullmq": "^5.58.5",
         "dotenv": "^17.2.2",
         "ioredis": "^5.7.0",
-        "resend": "^6.0.2"
+        "resend": "^6.0.2",
+        "tslib": "^2.8.1"
     },
     "devDependencies": {
         "@types/node": "^20.14.10",
-        "tsx": "^4.20.5"
+        "tsx": "^4.20.5",
+        "typescript": "^5.8.2"
     }
 }

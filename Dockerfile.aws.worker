@@ -1,0 +1,43 @@
+# Use the official Node.js 22 image as base
+FROM public.ecr.aws/lambda/nodejs:22 AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+WORKDIR /app
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Copy package files for worker
+COPY worker/package.json worker/pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+# Build stage
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY worker/ ./
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Build AWS Lambda JavaScript files
+RUN pnpm build:aws
+
+# Production image for worker
+FROM base AS runner
+WORKDIR ${LAMBDA_TASK_ROOT}
+
+ENV NODE_ENV=production
+
+# Copy worker files
+COPY --from=builder /app/node_modules ${LAMBDA_TASK_ROOT}/node_modules
+COPY --from=builder /app/dist ${LAMBDA_TASK_ROOT}/dist
+COPY --from=builder /app/package.json ${LAMBDA_TASK_ROOT}/package.json
+COPY --from=builder /app/email-template ${LAMBDA_TASK_ROOT}/email-template
+
+
+RUN sed -i '/"type": "module",/d' ${LAMBDA_TASK_ROOT}/package.json
+
+# Set the Lambda handler
+CMD ["dist/handler.handler"]

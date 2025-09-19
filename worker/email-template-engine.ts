@@ -1,9 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export interface Product {
     id: string;
@@ -41,7 +37,7 @@ export class EmailTemplateEngine {
     private template: string;
 
     constructor() {
-        this.templatePath = path.join(__dirname, 'email-template', 'back-in-stock.html');
+        this.templatePath = path.join(process.cwd(), 'email-template', 'back-in-stock.html');
         this.template = '';
     }
 

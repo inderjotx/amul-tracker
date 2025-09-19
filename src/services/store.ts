@@ -19,63 +19,187 @@ interface PincodeResponse {
     total: number;
 }
 
+
+interface InfoResponse {
+    data: {
+        substore_id: string
+    }
+}
+
+
+
+
+
 class StoreService {
 
-    private storeNametoId: Record<string, string> = {
-        "punjab": "66505ff3998183e1b1935d0e"
+    private cookie
+    private tid
+    private headers: Record<string, string>
+
+    constructor() {
+        this.cookie = ''
+
+        this.tid = ''
+        this.headers = {
+            'Content-Type': 'application/json',
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en-US,en;q=0.9',
+            'base_url': 'https://shop.amul.com/en/browse/protein',
+            'frontend': '1',
+            'priority': 'u=1, i',
+            'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"macOS"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+        }
     }
 
+    getCookiesFromHeaders(headers: Headers) {
+        // const allSetCookies = headers.raw()['set-cookie'] ?? []
+        const allSetCookies = headers.getSetCookie()
+        return allSetCookies.join('; ')
+    }
+
+    async makeCallJustToGetCookies() {
+        const url = `https://shop.amul.com/en/browse/protein`
+        const response = await fetch(url, {
+            headers: {
+                ...this.headers,
+                ...(this.cookie.length > 0 ? { 'cookie': this.cookie } : {})
+            }
+        })
+        const cookies = this.getCookiesFromHeaders(response.headers)
+        this.cookie = cookies
+    }
+
+
+    async makeInfoCall() {
+
+        try {
+            const url = `https://shop.amul.com/user/info.js?_v=${Date.now()}`
+            const response = await fetch(url, {
+                headers: {
+                    ...this.headers,
+                    'cookie': this.cookie
+                }
+            })
+
+            const data = await response.text() as unknown as string
+            const cleanedData = data.replace(/^session\s*=\s*/, "");
+
+            const info = JSON.parse(cleanedData) as InfoResponse
+
+            if (typeof info.data.substore_id !== 'string' || info.data.substore_id.trim().length === 0) {
+                throw new Error("Failed to get substore id from session info call ")
+            }
+
+            return info.data.substore_id
+
+        } catch (error) {
+            if (error instanceof Error) {
+                throw new Error("Failed to get substore id from session info call ", error)
+            } else {
+                throw new Error("Failed to get substore id from session info call ", error as Error)
+            }
+        }
+    }
+
+
+
+    async getTid() {
+        const storeId = '62fa94df8c13af2e242eba16'
+        const timeStamp = Date.now()
+        const randomNumber = Math.floor(Math.random() * 1e3)
+        const prevTid = this.tid
+        const digest = `${storeId}:${timeStamp}:${randomNumber}:${prevTid}`;
+        const encoder = new TextEncoder()
+        const encodedDigest = encoder.encode(digest)
+
+        const hash = await crypto.subtle.digest("SHA-256", encodedDigest)
+        const hashArray = Array.from(new Uint8Array(hash));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+
+
+        return `${timeStamp}:${randomNumber}:${hashHex}`;
+    }
+
+
+
+    private storeNametoSubStoreId: Record<string, string> = {}
+    private pinCodeToSubStoreId: Record<string, string> = {}
+
     getStoreData() {
-        return this.storeNametoId
+        return this.storeNametoSubStoreId
     }
 
     async getStoreName(pincode: string) {
+        const tid = await this.getTid()
         const url = `https://shop.amul.com/entity/pincode?limit=50&filters[0][field]=pincode&filters[0][value]=${pincode}&filters[0][operator]=regex&cf_cache=1h`
-        const response = await fetch(url)
+        const response = await fetch(url, {
+            headers: {
+                ...this.headers,
+                'tid': tid,
+                'cookie': this.cookie
+            }
+        })
         const data = await response.json() as PincodeResponse
 
-        const substoreName = data?.records[0]?.substore
+        const substoreName = data?.records?.[0]?.substore
 
         const setCookie = response.headers.get('set-cookie')
+        this.cookie = setCookie ?? ''
 
-        return {
-            substoreName,
-            setCookie
+        if (typeof substoreName === 'string') {
+            return substoreName
+        } else {
+            throw new Error("Failed to get store name")
         }
+
     }
 
 
     async getStoreId(pincode: string) {
-        const { substoreName, setCookie } = await this.getStoreName(pincode)
-        const { isSuccess, cookie } = await this.getPreferences(substoreName ?? '', setCookie ?? '')
-        const info = await this.getInfo(cookie ?? '')
-        return {
-            isSuccess,
-            cookie,
-            substoreName,
-            info
+        try {
+
+            if (this.pinCodeToSubStoreId[pincode]) {
+                return {
+                    isSuccess: true,
+                    substoreId: this.pinCodeToSubStoreId[pincode]
+                }
+            }
+
+            await this.makeCallJustToGetCookies()
+            const substoreName = await this.getStoreName(pincode)
+
+
+            if (this.storeNametoSubStoreId[substoreName]) {
+                return {
+                    isSuccess: true,
+                    substoreId: this.storeNametoSubStoreId[substoreName]
+                }
+            }
+            await this.setPreferences(substoreName ?? '')
+            const substoreId = await this.makeInfoCall()
+
+            this.storeNametoSubStoreId[substoreName] = substoreId
+            this.pinCodeToSubStoreId[pincode] = substoreId
+
+            return {
+                substoreId
+            }
+        } catch (error) {
+            console.log("error", error)
         }
     }
 
 
-    async getInfo(cookie: string) {
-
-        const url = `https://shop.amul.com/user/info.js`
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Cookie': cookie ?? ''
-            }
-        })
-        const data = await response.text() as unknown
-        console.log("data is", data)
-        return data
-
-    }
 
 
-    async getPreferences(name: string, cookie?: string) {
+    async setPreferences(name: string) {
 
+        const tid = await this.getTid()
         const url = `https://shop.amul.com/entity/ms.settings/_/setPreferences`
         const body = {
             "data": {
@@ -84,43 +208,29 @@ class StoreService {
         }
         const response = await fetch(url, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Cookie': cookie ?? '',
-                'accept': 'application/json, text/plain, */*',
-                'accept-language': 'en-US,en;q=0.9',
-                'base_url': 'https://shop.amul.com/en/browse/protein',
-                'frontend': '1',
-                'priority': 'u=1, i',
-                'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"',
-                'sec-ch-ua-mobile': '?0',
-                'sec-ch-ua-platform': '"macOS"',
-                'sec-fetch-dest': 'empty',
-                'sec-fetch-mode': 'cors',
-                'sec-fetch-site': 'same-origin',
-                'tid': '1757221676557:499:12523a1e80124e22d57c77ffdab2bfa911a1a905bba084aedced150fd8a20e53'
-            },
             referrer: 'https://shop.amul.com/',
             body: JSON.stringify(body),
-            mode: 'cors',
-            credentials: 'include'
+            headers: {
+                ...this.headers,
+                'tid': tid,
+                'cookie': this.cookie
+            },
         });
 
         try {
-            const data = await response.text() as unknown
-            console.log("data is", data)
+            await response.text()
             if (!response.ok) {
                 throw new Error("Failed to get preferences")
             }
         } catch (error) {
-            console.log("error", error)
+            if (error instanceof Error) {
+                throw new Error("Failed to set preferences", error)
+            } else {
+                throw new Error("Failed to set preferences", error as Error)
+            }
         }
-        const isSuccess = response.ok
-        const newCookie = response.headers.get('set-cookie')
-        return {
-            isSuccess,
-            cookie: newCookie
-        }
+        const newCookie = this.getCookiesFromHeaders(response.headers)
+        this.cookie = newCookie
     }
 
 }
