@@ -14,6 +14,25 @@ export const auth = betterAuth({
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!
         }
     },
+    user: {
+        additionalFields: {
+            pincode: {
+                type: "string",
+                required: true,
+                input: false,
+            },
+            substoreId: {
+                type: "string",
+                required: true,
+                input: false,
+            },
+            substoreName: {
+                type: "string",
+                required: true,
+                input: false,
+            }
+        }
+    },
     database: drizzleAdapter(db, {
         provider: "pg",
     }),

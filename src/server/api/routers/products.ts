@@ -3,9 +3,17 @@ import { eq, and, sql } from "drizzle-orm";
 
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "@/server/api/trpc";
 import { product, track, user } from "@/server/db/schema";
+import { storeService } from "@/services/store";
+import { getServerSession } from "@/auth/utils";
 
 export const productsRouter = createTRPCRouter({
   // Get all products (public)
+
+  getUserSession: publicProcedure.query(async () => {
+    const session = await getServerSession();
+    return session;
+  }),
+
   getAll: publicProcedure
     .input(z.object({
       limit: z.number().min(1).max(30).default(30),
@@ -138,5 +146,51 @@ export const productsRouter = createTRPCRouter({
         isTracked: existingTrack.length > 0,
         trackId: existingTrack[0]?.id ?? null,
       };
+    }),
+
+  // Set user pincode and store information
+  setPincode: protectedProcedure
+    .input(z.object({
+      pincode: z.string().length(6, "Pincode must be exactly 6 digits").regex(/^\d{6}$/, "Pincode must contain only numbers")
+    }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // Get store information using the store service
+        const storeResult = await storeService.getStoreId(input.pincode);
+
+        if (!storeResult?.subStoreId) {
+          throw new Error("Unable to find stores for this pincode. Please try a different pincode.");
+        }
+
+        const { subStoreId, subStoreName } = storeResult;
+
+        // Update user with pincode and store information
+        await ctx.db
+          .update(user)
+          .set({
+            pincode: input.pincode,
+            substoreId: subStoreId,
+            substoreName: subStoreName,
+            updatedAt: new Date(),
+          })
+          .where(eq(user.id, ctx.user.id));
+
+        return {
+          success: true,
+          data: {
+            pincode: input.pincode,
+            substoreId: subStoreId,
+            substoreName: subStoreName
+          }
+        };
+
+      } catch (error) {
+        console.error("Error setting pincode:", error);
+        throw new Error(
+          error instanceof Error
+            ? error.message
+            : "An error occurred while setting your location. Please try again."
+        );
+      }
     }),
 });

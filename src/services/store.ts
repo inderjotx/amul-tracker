@@ -128,7 +128,10 @@ class StoreService {
 
 
     private storeNametoSubStoreId: Record<string, string> = {}
-    private pinCodeToSubStoreId: Record<string, string> = {}
+    private pinCodeToSubStore: Record<string, {
+        subStoreId: string,
+        subStoreName: string
+    }> = {}
 
     getStoreData() {
         return this.storeNametoSubStoreId
@@ -163,10 +166,10 @@ class StoreService {
     async getStoreId(pincode: string) {
         try {
 
-            if (this.pinCodeToSubStoreId[pincode]) {
+            if (this.pinCodeToSubStore[pincode]) {
                 return {
-                    isSuccess: true,
-                    substoreId: this.pinCodeToSubStoreId[pincode]
+                    subStoreId: this.pinCodeToSubStore[pincode].subStoreId,
+                    subStoreName: this.pinCodeToSubStore[pincode].subStoreName
                 }
             }
 
@@ -176,18 +179,22 @@ class StoreService {
 
             if (this.storeNametoSubStoreId[substoreName]) {
                 return {
-                    isSuccess: true,
-                    substoreId: this.storeNametoSubStoreId[substoreName]
+                    subStoreId: this.storeNametoSubStoreId[substoreName],
+                    subStoreName: substoreName
                 }
             }
             await this.setPreferences(substoreName ?? '')
             const substoreId = await this.makeInfoCall()
 
             this.storeNametoSubStoreId[substoreName] = substoreId
-            this.pinCodeToSubStoreId[pincode] = substoreId
+            this.pinCodeToSubStore[pincode] = {
+                subStoreId: substoreId,
+                subStoreName: substoreName
+            }
 
             return {
-                substoreId
+                subStoreName: substoreName,
+                subStoreId: substoreId,
             }
         } catch (error) {
             console.log("error", error)

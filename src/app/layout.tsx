@@ -4,7 +4,11 @@ import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 
 import { TRPCReactProvider } from "@/trpc/react";
+import { SignInProvider } from "@/contexts/signin-context";
+import { PincodeProvider } from "@/contexts/pincode-context";
 import Navbar from "@/components/navbar";
+import SignInDialog from "@/components/sign-in";
+import { PincodeDialog } from "@/components/pincode-dialog";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
@@ -25,11 +29,17 @@ export default function RootLayout({
     <html lang="en" className={`${geist.variable}`}>
       <body>
         <TRPCReactProvider>
-          <div className="bg-background min-h-screen">
-            <Navbar />
-            <main className="container mx-auto px-4 py-6">{children}</main>
-            <Toaster position="top-right" richColors />
-          </div>
+          <SignInProvider>
+            <PincodeProvider>
+              <div className="bg-background min-h-screen">
+                <Navbar />
+                <main className="container mx-auto px-4 py-6">{children}</main>
+                <SignInDialog />
+                <PincodeDialog />
+                <Toaster position="top-center" richColors />
+              </div>
+            </PincodeProvider>
+          </SignInProvider>
         </TRPCReactProvider>
       </body>
     </html>

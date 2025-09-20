@@ -7,62 +7,30 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState } from "react";
 import { signIn } from "@/auth/client";
 import { cn } from "@/lib/utils";
+import { useSignIn } from "@/contexts/signin-context";
 
-interface SignInDialogProps {
-  triggerText?: string;
-  triggerVariant?:
-    | "default"
-    | "destructive"
-    | "outline"
-    | "secondary"
-    | "ghost"
-    | "link";
-  triggerClassName?: string;
-}
-
-export default function SignInDialog({
-  triggerText = "Sign In",
-  triggerVariant = "default",
-  triggerClassName,
-}: SignInDialogProps) {
-  const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
+export default function SignInDialog() {
+  const { isOpen, closeSignIn } = useSignIn();
 
   const handleSignIn = async () => {
-    await signIn.social(
-      {
-        provider: "google",
-        callbackURL: "/dashboard",
-      },
-      {
-        onRequest: (ctx) => {
-          setLoading(true);
-        },
-        onResponse: (ctx) => {
-          setLoading(false);
-          // setOpen(false);
-        },
-      },
-    );
+    await signIn.social({
+      provider: "google",
+    });
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant={"default"} className={triggerClassName}>
-          {triggerText}
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={closeSignIn}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-lg md:text-xl">Sign In</DialogTitle>
-          <DialogDescription className="text-xs md:text-sm">
-            Enter your email below to login to your account
+          <DialogTitle className="mx-auto text-lg md:text-xl">
+            Sign In
+          </DialogTitle>
+          <DialogDescription className="mx-auto text-xs md:text-sm">
+            Login in required to track products . So that we can send email
+            notifications when product are available in your area.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -75,7 +43,6 @@ export default function SignInDialog({
             <Button
               variant="outline"
               className={cn("w-full gap-2")}
-              disabled={loading}
               onClick={handleSignIn}
             >
               <svg
