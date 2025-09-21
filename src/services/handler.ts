@@ -1,5 +1,6 @@
-import { productService } from "./product";
 
+import 'tsconfig-paths/register';
+import { productService } from "./product";
 
 
 export const handler = async () => {

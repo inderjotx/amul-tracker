@@ -18,11 +18,12 @@
     "moduleResolution": "node",
     "baseUrl": "./src",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["*"]
     }
   },
   "include": [
     "src/services/**/*",
+    "src/lib/**/*",
     "src/server/db/**/*",
     "src/utils/**/*",
     "src/env.js"

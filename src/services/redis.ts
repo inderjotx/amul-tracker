@@ -5,7 +5,6 @@ type Pincode = string
 type SubStoreName = string
 type SubStoreId = string
 
-type RedisKey = string
 
 type PincodeData = Record<Pincode, {
     subStoreName: SubStoreName
@@ -18,7 +17,7 @@ type SubStoreData = Record<SubStoreName, SubStoreId>
 export class RedisService {
 
     client: RedisClient
-    prevDataKey = "prevProductData"
+    prevDataKey = "prev_product_data"
     pincodeToSubStoreDataKey = "pincodeToSubStoreData"
     subStoreNameToSubStoreIdKey = "subStoreNameToSubStoreId"
 

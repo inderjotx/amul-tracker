@@ -32,7 +32,33 @@ class ProductService {
     }
 
 
-    async trackNotification() {
+    async singleTrackNotification(subStoreId: string, productId: string, trackingRequestId: string) {
+
+        const previousData = await this.redisService.getPrevProductData()
+        const subStoredIds = Object.keys(previousData ?? {})
+
+        const isUserSubStoreIdInDatabase = subStoredIds.includes(subStoreId)
+
+        if (!isUserSubStoreIdInDatabase) {
+            // do nothing 
+            return false
+        }
+
+        const productData = previousData?.[subStoreId]
+        const product = productData?.find((p) => p._id === productId)
+        if (!product) {
+            // do nothing 
+            return false
+        }
+
+        if (product.available) {
+            const trackingRequest = await this.mongoService.getUserTrackingRequest(trackingRequestId)
+            await this.notificationService.sendNotification({ trackingRequests: [trackingRequest] })
+            return true
+        }
+
+        return false
+
 
     }
 

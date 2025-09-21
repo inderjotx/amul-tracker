@@ -1,6 +1,6 @@
-import { mongoDb } from "@/lib/mongo-client";
+import { mongoDb } from "../lib/mongo-client";
 import { type Db, ObjectId } from "mongodb";
-import { storeService, type StoreService } from "@/services/store";
+import { storeService, type StoreService } from "../services/store";
 
 interface Product {
     _id: ObjectId;
@@ -98,7 +98,7 @@ export class MongoService {
 
 
 
-    async trackProduct(userId: string, productId: string, substoreId: string): Promise<void> {
+    async trackProduct(userId: string, productId: string, substoreId: string): Promise<string> {
         try {
             // Validate ObjectId format
             if (!ObjectId.isValid(productId)) {
@@ -115,11 +115,12 @@ export class MongoService {
                 throw new Error("Product is already being tracked");
             }
 
-            await this.mongoDb.collection("tracks").insertOne({
+            const track = await this.mongoDb.collection("tracks").insertOne({
                 userId: userId,
                 productId: productId,
                 substoreId: substoreId
-            });
+            })
+            return track.insertedId.toString()
         } catch (error) {
             console.error("Error tracking product:", error);
             throw error;
@@ -206,6 +207,22 @@ export class MongoService {
         return trackingRequestsWithUsersAndProducts;
     }
 
+    async getUserTrackingRequest(trackingRequestId: string) {
+
+        const trackingRequest = await this.mongoDb.collection("tracks").findOne({ _id: new ObjectId(trackingRequestId) }) as Track
+        if (!trackingRequest) {
+            throw new Error("Tracking request not found");
+        }
+
+        const user = await this.mongoDb.collection("users").findOne({ _id: new ObjectId(trackingRequest.userId) })
+        const product = await this.mongoDb.collection("products").findOne({ _id: new ObjectId(trackingRequest.productId) })
+
+        return {
+            ...trackingRequest,
+            user,
+            product
+        }
+    }
 }
 
 export const mongoService = new MongoService(mongoDb, storeService);

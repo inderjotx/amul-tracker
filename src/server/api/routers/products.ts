@@ -1,5 +1,5 @@
 import { z } from "zod";
-
+import { productService } from "@/services/product";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "@/server/api/trpc";
 import { mongoService } from "@/services/mongo";
 import { getServerSession } from "@/auth/utils";
@@ -44,6 +44,7 @@ export const productsRouter = createTRPCRouter({
     }))
     .mutation(async ({ ctx, input }) => {
       // Get user session to access substoreId
+
       const currentUser = await getServerSession();
       const substoreId = currentUser?.user?.substoreId;
 
@@ -51,7 +52,15 @@ export const productsRouter = createTRPCRouter({
         throw new Error("User does not have a substore");
       }
 
-      await mongoService.trackProduct(ctx.user.id, input.productId, substoreId);
+      const trackingRequestId = await mongoService.trackProduct(ctx.user.id, input.productId, substoreId);
+      const isNotificationSent = await productService.singleTrackNotification(substoreId, input.productId, trackingRequestId);
+
+
+      if (isNotificationSent) {
+        console.log("Notification sent for product", input.productId);
+      } else {
+        console.log("Notification not sent for product", input.productId);
+      }
 
       return { success: true };
     }),
