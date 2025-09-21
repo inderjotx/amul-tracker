@@ -18,7 +18,7 @@ export default function SignInDialog() {
   const utils = api.useUtils();
 
   const handleSignIn = async () => {
-    await utils.products.getUserSession.invalidate();
+    void utils.products.getUserSession.invalidate();
     await signIn.social({
       provider: "google",
     });
