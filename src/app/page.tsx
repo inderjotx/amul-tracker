@@ -22,13 +22,9 @@ function ProductsContent() {
   const { openPincode } = usePincode();
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 30;
-  const [processingProducts, setProcessingProducts] = useState<Set<string>>(
-    new Set(),
-  );
   const [filter, setFilter] = useState<FilterType>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Fetch products with pagination
   const { data: productsData, isLoading: productsLoading } =
     api.products.getAll.useQuery({
       limit: productsPerPage,
@@ -72,15 +68,9 @@ function ProductsContent() {
   // Check if a product is tracked
   const isProductTracked = (productId: string) => {
     return (
-      trackedProducts?.some((tracked) => tracked.id === productId) ?? false
-    );
-  };
-
-  // Get track ID for a product
-  const getTrackId = (productId: string) => {
-    return (
-      trackedProducts?.find((tracked) => tracked.id === productId)?.trackId ??
-      null
+      trackedProducts?.some(
+        (tracked) => tracked._id.toString() === productId,
+      ) ?? false
     );
   };
 
@@ -94,32 +84,21 @@ function ProductsContent() {
       openSignIn();
       return;
     }
-    if (processingProducts.has(productId)) return;
 
     if (!session?.user?.substoreId) {
       openPincode();
       return;
     }
 
-    setProcessingProducts((prev) => new Set(prev).add(productId));
-
     trackMutation.mutate(
       {
         productId,
       },
-      {
-        onSettled: () => {
-          setProcessingProducts((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(productId);
-            return newSet;
-          });
-        },
-      },
+      {},
     );
   };
 
-  const handleUntrack = (trackId: string) => {
+  const handleUntrack = (productId: string) => {
     if (!isLoggedIn) {
       openSignIn();
       return;
@@ -130,25 +109,7 @@ function ProductsContent() {
       return;
     }
 
-    const productId = trackedProducts?.find(
-      (tracked) => tracked.trackId === trackId,
-    )?.id;
-    if (!productId || processingProducts.has(productId)) return;
-
-    setProcessingProducts((prev) => new Set(prev).add(productId));
-
-    untrackMutation.mutate(
-      { trackId },
-      {
-        onSettled: () => {
-          setProcessingProducts((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(productId);
-            return newSet;
-          });
-        },
-      },
-    );
+    untrackMutation.mutate({ productId });
   };
 
   const handlePageChange = (page: number) => {
@@ -159,7 +120,7 @@ function ProductsContent() {
   // Filter products based on tracking status and search query
   const allProducts = productsData?.products ?? [];
   const filteredProducts = allProducts.filter((product) => {
-    const isTracked = isProductTracked(product.id);
+    const isTracked = isProductTracked(product._id.toString());
 
     // Apply search filter
     const matchesSearch =
@@ -197,7 +158,7 @@ function ProductsContent() {
   });
 
   const trackedCount = searchFilteredProducts.filter((product) =>
-    isProductTracked(product.id),
+    isProductTracked(product._id.toString()),
   ).length;
   const untrackedCount = searchFilteredProducts.length - trackedCount;
 
@@ -295,13 +256,12 @@ function ProductsContent() {
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
         {products?.map((product) => {
-          const isTracked = isProductTracked(product.id);
-          const trackId = getTrackId(product.id);
-          const isProcessing = processingProducts.has(product.id);
+          const isTracked = isProductTracked(product._id.toString());
+          const isProcessing = false;
 
           return (
             <Card
-              key={product.id}
+              key={`${product._id.toString()}-${product.name}`}
               className="flex flex-col justify-between overflow-hidden pt-0 pb-2 transition-shadow hover:shadow-lg"
             >
               <CardHeader className="p-0">
@@ -342,7 +302,7 @@ function ProductsContent() {
                   <div className="flex items-center gap-2">
                     {isTracked ? (
                       <Button
-                        onClick={() => trackId && handleUntrack(trackId)}
+                        onClick={() => handleUntrack(product._id.toString())}
                         variant="outline"
                         className="border-red-200 text-red-600 hover:bg-red-50"
                         disabled={isProcessing}
@@ -352,7 +312,7 @@ function ProductsContent() {
                       </Button>
                     ) : (
                       <Button
-                        onClick={() => handleTrack(product.id)}
+                        onClick={() => handleTrack(product._id.toString())}
                         variant="default"
                         className="shadow-xl shadow-teal-200"
                         disabled={isProcessing}

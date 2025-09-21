@@ -30,7 +30,7 @@ interface InfoResponse {
 
 
 
-class StoreService {
+export class StoreService {
 
     private cookie
     private tid
@@ -129,8 +129,8 @@ class StoreService {
 
     private storeNametoSubStoreId: Record<string, string> = {}
     private pinCodeToSubStore: Record<string, {
-        subStoreId: string,
-        subStoreName: string
+        substoreId: string,
+        substoreName: string
     }> = {}
 
     getStoreData() {
@@ -168,8 +168,8 @@ class StoreService {
 
             if (this.pinCodeToSubStore[pincode]) {
                 return {
-                    subStoreId: this.pinCodeToSubStore[pincode].subStoreId,
-                    subStoreName: this.pinCodeToSubStore[pincode].subStoreName
+                    substoreId: this.pinCodeToSubStore[pincode].substoreId,
+                    substoreName: this.pinCodeToSubStore[pincode].substoreName
                 }
             }
 
@@ -179,8 +179,8 @@ class StoreService {
 
             if (this.storeNametoSubStoreId[substoreName]) {
                 return {
-                    subStoreId: this.storeNametoSubStoreId[substoreName],
-                    subStoreName: substoreName
+                    substoreId: this.storeNametoSubStoreId[substoreName],
+                    substoreName: substoreName
                 }
             }
             await this.setPreferences(substoreName ?? '')
@@ -188,13 +188,13 @@ class StoreService {
 
             this.storeNametoSubStoreId[substoreName] = substoreId
             this.pinCodeToSubStore[pincode] = {
-                subStoreId: substoreId,
-                subStoreName: substoreName
+                substoreId,
+                substoreName,
             }
 
             return {
-                subStoreName: substoreName,
-                subStoreId: substoreId,
+                substoreName: substoreName,
+                substoreId,
             }
         } catch (error) {
             console.log("error", error)

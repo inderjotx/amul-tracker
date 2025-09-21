@@ -10,14 +10,11 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import type { Session, User } from "better-auth";
-
-import { db } from "@/server/db";
 import { getServerSession } from "@/auth/utils";
 
 
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   return {
-    db,
     ...opts,
     session: null as Session | null,
     user: null as User | null,

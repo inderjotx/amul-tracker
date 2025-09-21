@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 export interface Product {
-    id: string;
+    _id: string;
     alias: string;
     external_product_id: string;
     sku: string;
@@ -13,7 +13,7 @@ export interface Product {
 }
 
 export interface User {
-    id: string;
+    _id: string;
     name: string;
     email: string;
     pincode?: string;
@@ -23,7 +23,7 @@ export interface User {
 }
 
 export interface TrackingRequest {
-    id: string;
+    _id: string;
     userId: string;
     productId: string;
     substoreId: string;

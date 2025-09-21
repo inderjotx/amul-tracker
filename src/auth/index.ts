@@ -1,9 +1,10 @@
 import {
     betterAuth
 } from 'better-auth';
-import { db } from '@/server/db';
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { config as dotEnvConfig } from 'dotenv';
+import { mongodbAdapter } from "better-auth/adapters/mongodb";
+import { mongoDb } from '@/lib/mongo-client';
+
 dotEnvConfig();
 
 export const auth = betterAuth({
@@ -33,7 +34,7 @@ export const auth = betterAuth({
             }
         }
     },
-    database: drizzleAdapter(db, {
-        provider: "pg",
+    database: mongodbAdapter(mongoDb, {
+        usePlural: true,
     }),
 });

@@ -1,10 +1,7 @@
 import { storeService } from "./store"
 import { redisService, type RedisService } from "./redis"
-// import { type QueueService, queueService } from "./queue"
-import { db, type DBClient } from "../server/db"
 import { notificationService, type NotificationService } from "./aws-sns"
-import { track } from "../server/db/schema"
-import { eq, and } from "drizzle-orm"
+import { type MongoService, mongoService } from "./mongo"
 
 export type ProductData = Record<string, Array<{ _id: string, available: boolean }>>
 type StoreService = typeof storeService
@@ -20,11 +17,11 @@ class ProductService {
 
 
 
-    constructor(private storeService: StoreService, private redisService: RedisService, private notificationService: NotificationService, private db: DBClient) {
+    constructor(private storeService: StoreService, private redisService: RedisService, private notificationService: NotificationService, private mongoService: MongoService) {
         this.storeService = storeService
         this.redisService = redisService
         this.notificationService = notificationService
-        this.db = db
+        this.mongoService = mongoService
     }
 
 
@@ -87,17 +84,7 @@ class ProductService {
 
     async getTrackingRequests(subStoreId: string, productId: string) {
 
-        const trackingRequests = await this.db.query.track.findMany({
-            where: and(
-                eq(track.substoreId, subStoreId),
-                eq(track.productId, productId)
-            ),
-            with: {
-                user: true,
-                product: true,
-            }
-        });
-
+        const trackingRequests = await this.mongoService.getTrackingRequests(subStoreId, productId)
 
         if (trackingRequests.length > 0) {
             await this.notificationService.sendNotification({ trackingRequests })
@@ -144,6 +131,8 @@ class ProductService {
             return []
         }
     }
+
 }
 
-export const productService = new ProductService(storeService, redisService, notificationService, db)
+
+export const productService = new ProductService(storeService, redisService, notificationService, mongoService)
