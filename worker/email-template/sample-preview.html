@@ -183,44 +183,29 @@
         </div>
         
         <div class="content">
-            <p class="greeting">Hello {{userName}},</p>
+            <p class="greeting">Hello John Doe,</p>
             
             <p class="message">
                 The product you are tracking is now available for purchase. This is an automated notification based on your tracking request.
             </p>
             
             <div class="products-container">
-                {{#each products}}
+                
                 <div class="product-card">
-                    {{#if product.image}}
-                    <img src="{{product.image}}" alt="{{product.name}}" class="product-image" />
-                    {{else}}
-                    <div class="product-image" style="background-color: #e9ecef; display: flex; align-items: center; justify-content: center; color: #6c757d;">
-                        No Image Available
-                    </div>
-                    {{/if}}
+                    <img src="https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&h=400&fit=crop&crop=center" alt="Amul Butter" class="product-image" />
                     
-                    <h2 class="product-name">{{product.name}}</h2>
+                    <h2 class="product-name">Amul Salted Butter 100g</h2>
                     
-                    {{#if product.description}}
-                    <p class="product-description">{{product.description}}</p>
-                    {{/if}}
+                    <p class="product-description">Rich, creamy butter made from fresh cream. Perfect for cooking, baking, and spreading on bread.</p>
                     
-                    <div class="product-price">₹{{product.usualPrice}}</div>
+                    <div class="product-price">₹55</div>
                     
-                    <p class="product-sku">SKU: {{product.sku}}</p>
+                    <p class="product-sku">SKU: AMUL-BUTTER-100G-002</p>
                     
-                    <a href="https://shop.amul.com/en/product/{{product.alias}}" class="cta-button">
+                    <a href="https://shop.amul.com/en/product/amul-salted-butter-100g" class="cta-button">
                         View Product
                     </a>
                 </div>
-                {{/each}}
-                
-                {{#unless products.length}}
-                <div class="no-products">
-                    <p>No products are currently back in stock.</p>
-                </div>
-                {{/unless}}
             </div>
             
             <p style="margin-top: 30px; font-size: 14px; color: #6c757d;">
@@ -231,7 +216,7 @@
         
         <div class="footer">
             <p>This is an automated notification from your product tracking service.</p>
-            <p>To manage your tracking preferences, visit your account settings or <a href="https://tracker.inderjot.xyz" target="_blank" style="color: #8b5cf6;">unsubscribe</a>.</p>
+            <p>To manage your tracking preferences, visit your account settings or <a href="#" style="color: #8b5cf6;">unsubscribe</a>.</p>
         </div>
     </div>
 </body>
