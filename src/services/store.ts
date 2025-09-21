@@ -1,3 +1,4 @@
+import { type RedisService, redisService } from "./redis";
 
 
 interface PincodeRecord {
@@ -36,8 +37,9 @@ export class StoreService {
     private tid
     private headers: Record<string, string>
 
-    constructor() {
+    constructor(private redisService: RedisService) {
         this.cookie = ''
+        this.redisService = redisService
 
         this.tid = ''
         this.headers = {
@@ -127,14 +129,10 @@ export class StoreService {
 
 
 
-    private storeNametoSubStoreId: Record<string, string> = {}
-    private pinCodeToSubStore: Record<string, {
-        substoreId: string,
-        substoreName: string
-    }> = {}
 
-    getStoreData() {
-        return this.storeNametoSubStoreId
+    async getStoreData() {
+        const storeData = await this.redisService.getSubStoreData()
+        return storeData
     }
 
     async getStoreName(pincode: string) {
@@ -166,36 +164,39 @@ export class StoreService {
     async getStoreId(pincode: string) {
         try {
 
-            if (this.pinCodeToSubStore[pincode]) {
+            const pincodeToSubStoreData = await this.redisService.getPincodeToSubStoreData(pincode)
+            if (pincodeToSubStoreData) {
                 return {
-                    substoreId: this.pinCodeToSubStore[pincode].substoreId,
-                    substoreName: this.pinCodeToSubStore[pincode].substoreName
+                    substoreId: pincodeToSubStoreData.subStoreId,
+                    substoreName: pincodeToSubStoreData.subStoreName
                 }
             }
 
             await this.makeCallJustToGetCookies()
             const substoreName = await this.getStoreName(pincode)
 
+            const subStoreId = await this.redisService.getSubStoreToSubStoreId(substoreName)
 
-            if (this.storeNametoSubStoreId[substoreName]) {
+            if (subStoreId) {
+                await this.redisService.setPincodeData({ pincode: pincode, subStoreName: substoreName, subStoreId: subStoreId })
                 return {
-                    substoreId: this.storeNametoSubStoreId[substoreName],
+                    substoreId: subStoreId,
                     substoreName: substoreName
                 }
             }
             await this.setPreferences(substoreName ?? '')
             const substoreId = await this.makeInfoCall()
 
-            this.storeNametoSubStoreId[substoreName] = substoreId
-            this.pinCodeToSubStore[pincode] = {
+            await Promise.all([
+                this.redisService.setSubStoreData({ subStoreName: substoreName, subStoreId: substoreId }),
+                this.redisService.setPincodeData({ pincode: pincode, subStoreName: substoreName, subStoreId: substoreId })
+            ])
+
+            return {
                 substoreId,
                 substoreName,
             }
 
-            return {
-                substoreName: substoreName,
-                substoreId,
-            }
         } catch (error) {
             console.log("error", error)
         }
@@ -243,4 +244,4 @@ export class StoreService {
 }
 
 
-export const storeService = new StoreService()
+export const storeService = new StoreService(redisService)

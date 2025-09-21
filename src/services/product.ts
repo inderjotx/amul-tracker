@@ -32,6 +32,12 @@ class ProductService {
     }
 
 
+    async trackNotification() {
+
+    }
+
+
+
     async getProductRecentlyComeInStock() {
 
         const prevProductData = await this.redisService.getPrevProductData()
@@ -98,8 +104,8 @@ class ProductService {
 
 
     async getAllSubStoreProducts() {
-        const storeData = this.storeService.getStoreData();
-        const substoreIds = Object.values(storeData);
+        const storeData = await this.storeService.getStoreData();
+        const substoreIds = Object.values(storeData ?? {});
         const productsArray = await Promise.all(
             substoreIds.map(async (substoreId) => {
                 const data = await this.getProducts(substoreId);
