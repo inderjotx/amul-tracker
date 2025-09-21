@@ -5,12 +5,12 @@ import { sendEmail } from './send-email';
 // Test data
 const mockTrackingRequests: TrackingRequest[] = [
     {
-        id: '1',
+        _id: '1',
         userId: 'user1',
         productId: 'product1',
         substoreId: 'substore1',
         user: {
-            id: 'user1',
+            _id: 'user1',
             name: 'John Doe',
             email: 'inderjot@amityonline.com',
             pincode: '110001',
@@ -19,7 +19,7 @@ const mockTrackingRequests: TrackingRequest[] = [
             city: 'Delhi'
         },
         product: {
-            id: 'product1',
+            _id: 'product1',
             alias: 'amul-protein-powder-1kg',
             external_product_id: 'ext123',
             sku: 'AMUL-PROT-1KG',

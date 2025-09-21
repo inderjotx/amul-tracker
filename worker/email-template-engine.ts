@@ -59,7 +59,7 @@ export class EmailTemplateEngine {
 
         // Replace simple variables
         processedTemplate = processedTemplate.replace(/\{\{userName\}\}/g, data.user.name);
-        processedTemplate = processedTemplate.replace(/\{\{notificationId\}\}/g, data.id);
+        processedTemplate = processedTemplate.replace(/\{\{notificationId\}\}/g, data._id);
         processedTemplate = processedTemplate.replace(/\{\{timestamp\}\}/g, new Date().toISOString());
 
         // Process products array

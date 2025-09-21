@@ -37,8 +37,6 @@ RUN echo ${LAMBDA_TASK_ROOT}
 COPY --from=builder /app/node_modules ${LAMBDA_TASK_ROOT}/node_modules
 COPY --from=builder /app/dist ${LAMBDA_TASK_ROOT}/dist
 COPY --from=builder /app/package.json ${LAMBDA_TASK_ROOT}/package.json
-COPY --from=builder /app/drizzle ${LAMBDA_TASK_ROOT}/drizzle
-COPY --from=builder /app/drizzle.config.ts ${LAMBDA_TASK_ROOT}/drizzle.config.ts
 COPY --from=builder /app/tsconfig.aws.json ${LAMBDA_TASK_ROOT}/tsconfig.aws.json
 
 RUN sed -i '/"type": "module",/d' ${LAMBDA_TASK_ROOT}/package.json
