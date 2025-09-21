@@ -13,16 +13,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { api } from "@/trpc/react";
 
 export default function Navbar() {
   const { data: session, isPending } = useSession();
   const { openSignIn } = useSignIn();
   const { openPincode } = usePincode();
-  const router = useRouter();
+  const utils = api.useUtils();
+
   const handleSignOut = async () => {
+    void utils.products.getUserSession.invalidate();
+    void utils.products.getTracked.invalidate();
     await signOut();
-    router.refresh();
   };
 
   return (
@@ -37,15 +39,8 @@ export default function Navbar() {
             >
               Amul Tracker
             </Link>
-            <Link
-              href="/products"
-              className="text-foreground/80 hover:text-foreground text-lg font-medium transition-colors"
-            >
-              Products
-            </Link>
           </div>
 
-          {/* Right side - User profile or Sign in */}
           <div className="flex items-center space-x-4">
             {isPending ? (
               <div className="bg-muted h-8 w-8 animate-pulse rounded-full" />

@@ -11,11 +11,14 @@ import {
 import { signIn } from "@/auth/client";
 import { cn } from "@/lib/utils";
 import { useSignIn } from "@/contexts/signin-context";
+import { api } from "@/trpc/react";
 
 export default function SignInDialog() {
   const { isOpen, closeSignIn } = useSignIn();
+  const utils = api.useUtils();
 
   const handleSignIn = async () => {
+    await utils.products.getUserSession.invalidate();
     await signIn.social({
       provider: "google",
     });

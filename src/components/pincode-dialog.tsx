@@ -23,10 +23,12 @@ export function PincodeDialog() {
   const { isOpen, closePincode } = usePincode();
   const [pincode, setPincode] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const utils = api.useUtils();
 
   const setPincodeMutation = api.products.setPincode.useMutation({
     onSuccess: () => {
       toast.success("Location set successfully!");
+      void utils.products.getUserSession.invalidate();
       closePincode();
       setPincode("");
       setError(null);

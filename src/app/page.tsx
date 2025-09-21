@@ -18,6 +18,7 @@ type FilterType = "all" | "tracked" | "untracked";
 
 function ProductsContent() {
   const { data: session } = api.products.getUserSession.useQuery();
+
   const { openSignIn } = useSignIn();
   const { openPincode } = usePincode();
   const [currentPage, setCurrentPage] = useState(1);
