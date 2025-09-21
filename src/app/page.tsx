@@ -41,7 +41,13 @@ function ProductsContent() {
     });
 
   const trackMutation = api.products.track.useMutation({
+    onMutate: () => {
+      toast.loading("Starting product tracking...", {
+        id: "track-product",
+      });
+    },
     onSuccess: () => {
+      toast.dismiss("track-product");
       toast.success(
         "Product tracking started!. Once this product is in stock, you will receive a notification. Make sure to check Promotions and Spam inboxes as well ",
         {
@@ -51,17 +57,25 @@ function ProductsContent() {
       void refetchTracked();
     },
     onError: (error) => {
+      toast.dismiss("track-product");
       toast.error(`Error: ${error.message}`);
     },
   });
 
   const untrackMutation = api.products.untrack.useMutation({
+    onMutate: () => {
+      toast.loading("Removing product from tracking...", {
+        id: "untrack-product",
+      });
+    },
     onSuccess: () => {
+      toast.dismiss("untrack-product");
       toast.success("Product removed from tracking!");
       // Refetch tracked products data
       void refetchTracked();
     },
     onError: (error) => {
+      toast.dismiss("untrack-product");
       toast.error(`Error: ${error.message}`);
     },
   });
@@ -258,7 +272,9 @@ function ProductsContent() {
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
         {products?.map((product) => {
           const isTracked = isProductTracked(product._id.toString());
-          const isProcessing = false;
+          const isTracking = trackMutation.isPending;
+          const isUntracking = untrackMutation.isPending;
+          const isProcessing = isTracking || isUntracking;
 
           return (
             <Card
@@ -308,8 +324,12 @@ function ProductsContent() {
                         className="border-red-200 text-red-600 hover:bg-red-50"
                         disabled={isProcessing}
                       >
-                        <HeartOff className="mr-1 h-3 w-3" />
-                        {isProcessing ? "..." : "Untrack"}
+                        {isUntracking ? (
+                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                        ) : (
+                          <HeartOff className="mr-1 h-3 w-3" />
+                        )}
+                        {isUntracking ? "Untracking..." : "Untrack"}
                       </Button>
                     ) : (
                       <Button
@@ -318,8 +338,12 @@ function ProductsContent() {
                         className="shadow-xl shadow-teal-200"
                         disabled={isProcessing}
                       >
-                        <Heart className="mr-1 h-3 w-3" />
-                        {isProcessing ? "..." : "Track"}
+                        {isTracking ? (
+                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                        ) : (
+                          <Heart className="mr-1 h-3 w-3" />
+                        )}
+                        {isTracking ? "Tracking..." : "Track"}
                       </Button>
                     )}
                     <Button
