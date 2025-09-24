@@ -12,7 +12,7 @@ const mockTrackingRequests: TrackingRequest[] = [
         user: {
             _id: 'user1',
             name: 'John Doe',
-            email: 'inderjot@amityonline.com',
+            email: 'inderjotsingh141@gmail.com',
             pincode: '110001',
             substoreId: 'substore1',
             substoreName: 'Delhi Store',

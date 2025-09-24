@@ -185,44 +185,26 @@
         </div>
         
         <div class="content">
-            <p class="greeting">Hello {{userName}},</p>
+            <p class="greeting">Hello John Doe,</p>
             
             <p class="message">
                 The product you are tracking is now available for purchase. This is an automated notification based on your tracking request.
             </p>
             
             <div class="products-container">
-                {{#each products}}
-                <div class="product-card">
-                    {{#if product.image}}
-                    <img src="{{product.image}}" alt="{{product.name}}" class="product-image" />
-                    {{else}}
-                    <div class="product-image" style="background-color: #e9ecef; display: flex; align-items: center; justify-content: center; color: #6c757d;">
-                        No Image Available
-                    </div>
-                    {{/if}}
-                    
-                    <h2 class="product-name">{{product.name}}</h2>
-                    
-                    {{#if product.description}}
-                    <p class="product-description">{{product.description}}</p>
-                    {{/if}}
-                    
-                    <div class="product-price">₹{{product.usualPrice}}</div>
-                    
-                    <p class="product-sku">SKU: {{product.sku}}</p>
-                    
-                    <a href="https://shop.amul.com/en/product/{{product.alias}}" class="cta-button" style="background-color: #8b5cf6; color: white; text-decoration: none;">
-                        View Product
-                    </a>
-                </div>
-                {{/each}}
                 
-                {{#unless products.length}}
-                <div class="no-products">
-                    <p>No products are currently back in stock.</p>
-                </div>
-                {{/unless}}
+        <div class="product-card">
+            <img src="https://shop.amul.com/images/protein-powder.jpg" alt="Amul Protein Powder 1kg" class="product-image" />
+            <h2 class="product-name">Amul Protein Powder 1kg</h2>
+            <p class="product-description">High-quality protein powder for muscle building</p>
+            <div class="product-price">₹1299</div>
+            <p class="product-sku">SKU: AMUL-PROT-1KG</p>
+            <a href="https://shop.amul.com/en/product/amul-protein-powder-1kg" class="cta-button">
+                View Product
+            </a>
+        </div>
+                
+                
             </div>
             
             <p style="margin-top: 30px; font-size: 14px; color: #6c757d;">

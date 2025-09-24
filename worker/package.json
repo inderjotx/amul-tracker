@@ -10,6 +10,7 @@
         "test:email": "tsx test-email-template.ts"
     },
     "dependencies": {
+        "@aws-sdk/client-ses": "^3.895.0",
         "bullmq": "^5.58.5",
         "dotenv": "^17.2.2",
         "ioredis": "^5.7.0",

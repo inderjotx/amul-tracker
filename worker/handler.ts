@@ -43,7 +43,7 @@ export async function handleProductInStock(data: { trackingRequests: TrackingReq
         // Send emails
         for (const email of emails) {
             try {
-                await sendEmail(email.user.email, email.subject, email.html, email.text);
+                await sendEmail(email.user.email, email.subject, email.html);
                 console.log(`Email sent successfully to ${email.user.email}`);
             } catch (error) {
                 console.error(`Failed to send email to ${email.user.email}:`, error);
