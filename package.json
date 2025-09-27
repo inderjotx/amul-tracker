@@ -8,6 +8,7 @@
     "build:aws": "tsc -p tsconfig.aws.json",
     "check": "next lint && tsc --noEmit",
     "db:seed": "tsx scripts/seed-mongo.ts",
+    "db:download-images": "tsx scripts/download-images.ts",
     "test": "tsx scripts/test-service.ts",
     "test:email": "tsx worker/test-email-template.ts",
     "dev": "next dev --turbo",

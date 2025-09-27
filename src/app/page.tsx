@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Pagination } from "@/components/ui/pagination";
 import { useSignIn } from "@/contexts/signin-context";
 import { usePincode } from "@/contexts/pincode-context";
+import { ProductCardSkeleton } from "@/components/ui/product-card-skeleton";
 
 const AMUL_SHOP_BASE_URL = "https://shop.amul.com/en/product/";
 
@@ -186,8 +187,70 @@ function ProductsContent() {
   if (productsLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <div className="flex min-h-[400px] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
+        <div className="mb-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <h1 className="mb-2 pb-6 text-3xl font-bold text-gray-900">
+                Amul Products
+              </h1>
+            </div>
+
+            {/* Search and Filter Controls */}
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-2">
+              {/* Search Input */}
+              <div className="relative max-w-md flex-1">
+                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Input
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              {/* Quick Filter Buttons */}
+              <div className="flex rounded-lg border border-gray-200 p-1">
+                <Button
+                  variant={filter === "all" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setFilter("all")}
+                  className="h-8 px-2 text-xs sm:px-3 sm:text-sm"
+                >
+                  <span className="hidden sm:inline">All</span>
+                  <span className="sm:hidden">All</span>
+                  <span className="ml-1">
+                    ({searchFilteredProducts.length})
+                  </span>
+                </Button>
+                <Button
+                  variant={filter === "tracked" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setFilter("tracked")}
+                  className="h-8 px-2 text-xs sm:px-3 sm:text-sm"
+                >
+                  <span className="hidden sm:inline">Tracked</span>
+                  <span className="sm:hidden">T</span>
+                  <span className="ml-1">({trackedCount})</span>
+                </Button>
+                <Button
+                  variant={filter === "untracked" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setFilter("untracked")}
+                  className="h-8 px-2 text-xs sm:px-3 sm:text-sm"
+                >
+                  <span className="hidden sm:inline">Untracked</span>
+                  <span className="sm:hidden">U</span>
+                  <span className="ml-1">({untrackedCount})</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          {Array.from({ length: 12 }).map((_, index) => (
+            <ProductCardSkeleton key={index} />
+          ))}
         </div>
       </div>
     );

@@ -1,5 +1,7 @@
 import { emailTemplateEngine, type TrackingRequest } from './email-template-engine';
 import fs from 'fs';
+import dotenv from 'dotenv';
+dotenv.config();
 import { sendEmail } from './send-email';
 
 // Test data
@@ -20,7 +22,7 @@ const mockTrackingRequests: TrackingRequest[] = [
         },
         product: {
             _id: 'product1',
-            alias: 'amul-protein-powder-1kg',
+            alias: 'amul-kool-protein-milkshake-or-vanilla-180-ml-or-pack-of-30',
             external_product_id: 'ext123',
             sku: 'AMUL-PROT-1KG',
             name: 'Amul Protein Powder 1kg',
@@ -42,7 +44,7 @@ async function testEmailTemplate() {
         for (const email of emails) {
             console.log(`\n--- Email for ${email.user.email} ---`);
             console.log(`Subject: ${email.subject}`);
-            await sendEmail(email.user.email, email.subject, email.html);
+            // await sendEmail(email.user.email, email.subject, email.html);
             console.log(`HTML length: ${email.html.length} characters`);
             fs.writeFileSync(`test-email-${email.user.email}.html`, email.html);
         }

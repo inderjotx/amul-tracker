@@ -82,8 +82,9 @@ export class EmailTemplateEngine {
      * Renders a single product card
      */
     private renderProductCard(product: Product): string {
+        //    /_next/image?url=%2Fproduct-images%2Famul-high-protein-blueberry-shake-200-ml-pack-of-8.png&w=640&q=75
         const imageHtml = product.image
-            ? `<img src="${product.image}" alt="${product.name}" class="product-image" />`
+            ? `<img src="${process.env.NEXT_PUBLIC_APP_URL}/_next/image?url=%2Fproduct-images%2F${product.alias}.png&w=640&q=75" alt="${product.name}" class="product-image" />`
             : `<div class="product-image" style="background-color: #e9ecef; display: flex; align-items: center; justify-content: center; color: #6c757d;">No Image Available</div>`;
 
         const descriptionHtml = product.description

@@ -45,6 +45,11 @@ export class MongoService {
         this.createIndexes().catch(console.error);
     }
 
+    // Getter to access the database connection
+    get db(): Db {
+        return this.mongoDb;
+    }
+
     async createIndexes(): Promise<void> {
         await this.mongoDb.collection("tracks").createIndex({ "substoreId": 1, "productId": 1 });
     }

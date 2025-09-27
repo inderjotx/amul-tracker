@@ -19,7 +19,6 @@ export const productsRouter = createTRPCRouter({
       offset: z.number().min(0).default(0)
     }))
     .query(async ({ input }) => {
-
       const products = await mongoService.getProducts(input.limit, input.offset);
       const totalCount = await mongoService.getTotalProducts();
 
