@@ -45,12 +45,16 @@ class ProductService {
         }
 
         const productData = previousData?.[subStoreId]
+
+        console.log("productData previous", productData)
         const product = productData?.find((p) => p._id === productId)
+        console.log("product", product)
         if (!product) {
             // do nothing 
             return false
         }
 
+        console.log("product.available", product.available)
         if (product.available) {
             const trackingRequest = await this.mongoService.getUserTrackingRequest(trackingRequestId)
             await this.notificationService.sendNotification({ trackingRequests: [trackingRequest] })
@@ -69,8 +73,8 @@ class ProductService {
         const prevProductData = await this.redisService.getPrevProductData()
         const productData = await this.getAllSubStoreProducts()
 
-        console.log("prevProductData", prevProductData)
-        console.log("productData", productData)
+        // console.log("prevProductData", JSON.stringify(prevProductData, null, 2))
+        // console.log("productData", JSON.stringify(productData, null, 2))
 
         const productRecentlyComeInStock: ProductData = {}
 
@@ -89,10 +93,11 @@ class ProductService {
 
 
         if (
-            Object.keys(productRecentlyComeInStock)
-                .map((substoreId) => productRecentlyComeInStock[substoreId]?.length ?? 0)
+            Object.keys(productData)
+                .map((substoreId) => productData[substoreId]?.length ?? 0)
                 .reduce((a, b) => a + b, 0) > 0
         ) {
+            console.log("setting prev product data", JSON.stringify(productData, null, 2))
             await this.redisService.setPrevProductData(productData)
         }
 
