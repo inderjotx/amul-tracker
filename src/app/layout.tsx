@@ -10,6 +10,7 @@ import Navbar from "@/components/navbar";
 import SignInDialog from "@/components/sign-in";
 import { PincodeDialog } from "@/components/pincode-dialog";
 import { Toaster } from "sonner";
+import { Footer } from "@/components/footer";
 
 export const metadata: Metadata = {
   title: "Amul Tracker",
@@ -36,6 +37,7 @@ export default function RootLayout({
                 <main className="mx-auto max-w-7xl px-2 py-6 md:px-4">
                   {children}
                 </main>
+                <Footer />
                 <SignInDialog />
                 <PincodeDialog />
                 <Toaster position="top-center" richColors />
