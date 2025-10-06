@@ -1,7 +1,7 @@
 import { storeService } from "./store"
 import { redisService, type RedisService } from "./redis"
 import { notificationService, type NotificationService } from "./aws-sns"
-import { type MongoService, mongoService, type TrackingRequest, type CombinedTrackingRequest } from "./mongo"
+import { type MongoService, mongoService, type TrackingRequest, type CombinedTrackingRequest, type User, type Product } from "./mongo"
 
 export type ProductData = Record<string, Array<{ _id: string, available: boolean }>>
 type StoreService = typeof storeService
@@ -58,10 +58,10 @@ class ProductService {
         if (product.available) {
             const trackingRequest = await this.mongoService.getUserTrackingRequest(trackingRequestId)
             await this.notificationService.sendNotification({
-                trackingRequests: [{
-                    user: trackingRequest.user,
-                    products: [trackingRequest.product]
-                }]
+                trackingRequests: {
+                    user: trackingRequest.user! as User,
+                    products: [trackingRequest.product!] as Product[]
+                }
             })
             return true
         }

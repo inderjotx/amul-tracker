@@ -99,30 +99,29 @@ export class EmailTemplateEngine {
         </div>`;
     }
 
-    async processTrackingRequests(trackingRequests: TrackingRequest[]): Promise<Array<{ user: User, html: string, subject: string }>> {
-        const emails: Array<{ user: User, html: string, subject: string }> = [];
+    async processTrackingRequests(trackingRequest: TrackingRequest): Promise<{ user: User, html: string, subject: string }> {
 
-        for (const trackingRequest of trackingRequests) {
-            const html = await this.renderTemplate(trackingRequest);
+        const html = await this.renderTemplate(trackingRequest);
 
-            // Generate subject based on number of products
-            let subject: string;
-            if (trackingRequest.products.length === 1) {
-                subject = `Stock Alert: ${trackingRequest.products[0].name} is available`;
-            } else if (trackingRequest.products.length > 1) {
-                subject = `Stock Alert: ${trackingRequest.products.length} products are available`;
-            } else {
-                subject = `Stock Alert: Products availability update`;
-            }
-
-            emails.push({
-                user: trackingRequest.user,
-                html,
-                subject
-            });
+        // Generate subject based on number of products
+        let subject: string;
+        if (trackingRequest.products.length === 1) {
+            subject = `Stock Alert: ${trackingRequest.products[0].name} is available`;
+        } else if (trackingRequest.products.length > 1) {
+            subject = `Stock Alert: ${trackingRequest.products.length} products are available`;
+        } else {
+            subject = `Stock Alert: Products availability update`;
         }
 
-        return emails;
+
+        return {
+            user: trackingRequest.user,
+            html,
+            subject
+        };
+
+
+
     }
 
 }

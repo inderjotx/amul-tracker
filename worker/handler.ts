@@ -12,7 +12,8 @@ export const handler = async (event: Event) => {
     try {
 
         for (const record of event.Records) {
-            const data = JSON.parse(record.body) as { trackingRequests: TrackingRequest[] };
+            const data = JSON.parse(record.body) as { trackingRequests: TrackingRequest };
+            console.log("data from queue", data);
             await handleProductInStock(data);
         }
 
@@ -27,30 +28,28 @@ export const handler = async (event: Event) => {
 
 
 
-export async function handleProductInStock(data: { trackingRequests: TrackingRequest[] }) {
+export async function handleProductInStock(data: { trackingRequests: TrackingRequest }) {
     console.log('Handling product in stock notification:', data);
 
     try {
-        if (!data.trackingRequests || data.trackingRequests.length === 0) {
+        if (!data.trackingRequests) {
             console.log('No tracking requests to process');
             return;
         }
 
-        const emails = await emailTemplateEngine.processTrackingRequests(data.trackingRequests);
+        const email = await emailTemplateEngine.processTrackingRequests(data.trackingRequests);
 
-        console.log(`Generated ${emails.length} emails to send`);
 
         // Send emails
-        for (const email of emails) {
-            try {
-                await sendEmail(email.user.email, email.subject, email.html);
-                console.log(`Email sent successfully to ${email.user.email}`);
-            } catch (error) {
-                console.error(`Failed to send email to ${email.user.email}:`, error);
-            }
+        try {
+            await sendEmail(email.user.email, email.subject, email.html);
+            console.log(`Email sent successfully to ${email.user.email}`);
+        } catch (error) {
+            console.error(`Failed to send email to ${email.user.email}:`, error);
         }
 
         console.log('All emails processed');
+
     } catch (error) {
         console.error('Error handling product in stock notification:', error);
         throw error;

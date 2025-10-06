@@ -1,7 +1,11 @@
 
 import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
+import { type CombinedTrackingRequest } from "./mongo";
 
 
+interface NotificationMessage {
+    trackingRequests: CombinedTrackingRequest;
+}
 
 export class NotificationService {
 
@@ -12,7 +16,7 @@ export class NotificationService {
         this.snsClient = new SNSClient({});
     }
 
-    async sendNotification(message: unknown) {
+    async sendNotification(message: NotificationMessage) {
         const params = {
             TopicArn: process.env.AWS_SNS_TOPIC_ARN,
             Message: JSON.stringify(message),

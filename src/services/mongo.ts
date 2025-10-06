@@ -2,7 +2,7 @@ import { mongoDb } from "../lib/mongo-client";
 import { type Db, ObjectId } from "mongodb";
 import { storeService, type StoreService } from "../services/store";
 
-interface Product {
+export interface Product {
     _id: ObjectId;
     alias: string;
     sku: string;
@@ -20,7 +20,7 @@ interface Track {
     substoreId: string;
 }
 
-interface User {
+export interface User {
     _id: ObjectId;
     name: string;
     email: string;
