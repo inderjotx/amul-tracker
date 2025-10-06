@@ -57,7 +57,12 @@ class ProductService {
         console.log("product.available", product.available)
         if (product.available) {
             const trackingRequest = await this.mongoService.getUserTrackingRequest(trackingRequestId)
-            await this.notificationService.sendNotification({ trackingRequests: [trackingRequest] })
+            await this.notificationService.sendNotification({
+                trackingRequests: [{
+                    user: trackingRequest.user,
+                    products: [trackingRequest.product]
+                }]
+            })
             return true
         }
 
