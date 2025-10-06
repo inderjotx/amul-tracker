@@ -56,7 +56,6 @@ export const productsRouter = createTRPCRouter({
 
       after(async () => {
         await productService.singleTrackNotification(substoreId, input.productId, trackingRequestId);
-
       })
 
       return { success: true };

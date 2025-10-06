@@ -7,10 +7,6 @@ import { sendEmail } from './send-email';
 // Test data
 const mockTrackingRequests: TrackingRequest[] = [
     {
-        _id: '1',
-        userId: 'user1',
-        productId: 'product1',
-        substoreId: 'substore1',
         user: {
             _id: 'user1',
             name: 'John Doe',
@@ -20,7 +16,7 @@ const mockTrackingRequests: TrackingRequest[] = [
             substoreName: 'Delhi Store',
             city: 'Delhi'
         },
-        product: {
+        products: [{
             _id: 'product1',
             alias: 'amul-kool-protein-milkshake-or-vanilla-180-ml-or-pack-of-30',
             external_product_id: 'ext123',
@@ -29,7 +25,16 @@ const mockTrackingRequests: TrackingRequest[] = [
             description: 'High-quality protein powder for muscle building',
             image: 'https://shop.amul.com/images/protein-powder.jpg',
             usualPrice: 1299
-        }
+        }, {
+            _id: 'product2',
+            alias: 'ice-cream-chocolate-100-ml',
+            external_product_id: 'ext124',
+            sku: 'AMUL-PROT-1KG',
+            name: 'Amul Ice Cream Chocolate 100ml',
+            description: 'High-quality chocolate ice cream',
+            image: 'https://shop.amul.com/images/chocolate-ice-cream.jpg',
+            usualPrice: 1299
+        }]
     },
 ];
 

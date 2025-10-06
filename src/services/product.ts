@@ -1,7 +1,7 @@
 import { storeService } from "./store"
 import { redisService, type RedisService } from "./redis"
 import { notificationService, type NotificationService } from "./aws-sns"
-import { type MongoService, mongoService } from "./mongo"
+import { type MongoService, mongoService, type TrackingRequest, type CombinedTrackingRequest } from "./mongo"
 
 export type ProductData = Record<string, Array<{ _id: string, available: boolean }>>
 type StoreService = typeof storeService
@@ -107,6 +107,8 @@ class ProductService {
 
     async sendProductNotification(productData: ProductData) {
 
+        console.log("product recently come in stock", JSON.stringify(productData, null, 2))
+
         const trackingRequests = await Promise.all(
             Object.entries(productData).flatMap(([substoreId, products]) =>
                 products.map((product) =>
@@ -114,24 +116,60 @@ class ProductService {
                 )
             )
         );
-        console.log("trackingRequests", trackingRequests)
+        const allTrackingRequests = trackingRequests.flat()
+        const combinedTrackingRequests = await this.combineTrackingRequestForUser(allTrackingRequests)
+        console.log("combinedTrackingRequests", JSON.stringify(combinedTrackingRequests, null, 2))
+        await this.sendNotificationForEachUser(combinedTrackingRequests)
         return
     }
 
+    async sendNotificationUser(combinedTrackingRequests: CombinedTrackingRequest) {
+        await this.notificationService.sendNotification({ trackingRequests: combinedTrackingRequests })
+    }
+
+    async sendNotificationForEachUser(combinedTrackingRequests: CombinedTrackingRequest[]) {
+        await Promise.all(
+            combinedTrackingRequests.map((combinedTrackingRequest) =>
+                this.sendNotificationUser(combinedTrackingRequest)
+            )
+        );
+    }
 
     async getTrackingRequests(subStoreId: string, productId: string) {
 
         const trackingRequests = await this.mongoService.getTrackingRequests(subStoreId, productId)
-
-        if (trackingRequests.length > 0) {
-            await this.notificationService.sendNotification({ trackingRequests })
-            console.log("Tracking requests sent -----------")
-        } else {
-            console.log("No tracking requests -----------")
-        }
         return trackingRequests;
     }
 
+
+    async combineTrackingRequestForUser(trackingRequests: TrackingRequest[]): Promise<CombinedTrackingRequest[]> {
+
+        const userToProducts = new Map<string, TrackingRequest[]>()
+
+
+        trackingRequests.forEach((trackingRequest) => {
+            if (userToProducts.has(trackingRequest.userId)) {
+                userToProducts.get(trackingRequest.userId)?.push(trackingRequest)
+            } else {
+                userToProducts.set(trackingRequest.userId, [trackingRequest])
+            }
+        })
+
+        const combinedTrackingRequests: CombinedTrackingRequest[] = []
+
+        userToProducts.forEach((products) => {
+
+            if (products?.[0]?.user) {
+                combinedTrackingRequests.push({
+                    user: products[0].user,
+                    products: products.map((product) => product.product!).filter(Boolean)
+                })
+            }
+        })
+
+        return combinedTrackingRequests
+
+    }
 
 
     async getAllSubStoreProducts() {

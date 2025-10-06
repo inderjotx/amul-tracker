@@ -32,7 +32,20 @@ interface User {
     updatedAt: Date;
 }
 
+export interface TrackingRequest {
+    user: User | undefined;
+    product: Product | undefined;
+    _id: ObjectId;
+    userId: string;
+    productId: string;
+    substoreId: string;
+}
 
+
+export interface CombinedTrackingRequest {
+    user: User;
+    products: Product[];
+}
 
 
 export class MongoService {
@@ -191,7 +204,7 @@ export class MongoService {
     }
 
 
-    async getTrackingRequests(substoreId: string, productId: string) {
+    async getTrackingRequests(substoreId: string, productId: string): Promise<TrackingRequest[]> {
 
         const trackingRequests = await this.mongoDb.collection("tracks").find({ substoreId, productId }).toArray() as Track[];
 

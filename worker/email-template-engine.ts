@@ -23,12 +23,8 @@ export interface User {
 }
 
 export interface TrackingRequest {
-    _id: string;
-    userId: string;
-    productId: string;
-    substoreId: string;
     user: User;
-    product: Product;
+    products: Product[];
 }
 
 
@@ -59,13 +55,12 @@ export class EmailTemplateEngine {
 
         // Replace simple variables
         processedTemplate = processedTemplate.replace(/\{\{userName\}\}/g, data.user.name);
-        processedTemplate = processedTemplate.replace(/\{\{notificationId\}\}/g, data._id);
         processedTemplate = processedTemplate.replace(/\{\{timestamp\}\}/g, new Date().toISOString());
 
         // Process products array
-        if (data.product) {
-            const productHtml = this.renderProductCard(data.product);
-            processedTemplate = processedTemplate.replace(/\{\{#each products\}\}[\s\S]*?\{\{\/each\}\}/g, productHtml);
+        if (data.products && data.products.length > 0) {
+            const productsHtml = data.products.map(product => this.renderProductCard(product)).join('');
+            processedTemplate = processedTemplate.replace(/\{\{#each products\}\}[\s\S]*?\{\{\/each\}\}/g, productsHtml);
         } else {
             // Show no products message
             processedTemplate = processedTemplate.replace(/\{\{#each products\}\}[\s\S]*?\{\{\/each\}\}/g,
@@ -104,18 +99,25 @@ export class EmailTemplateEngine {
         </div>`;
     }
 
-    async processTrackingRequests(trackingRequests: TrackingRequest[]): Promise<Array<{ user: User, html: string, text: string, subject: string }>> {
-        const emails: Array<{ user: User, html: string, text: string, subject: string }> = [];
+    async processTrackingRequests(trackingRequests: TrackingRequest[]): Promise<Array<{ user: User, html: string, subject: string }>> {
+        const emails: Array<{ user: User, html: string, subject: string }> = [];
 
-        for (const userRequests of trackingRequests) {
-            const html = await this.renderTemplate(userRequests);
-            const text = this.generatePlainText(userRequests);
-            const subject = `Stock Alert: ${userRequests.product.name} is available`;
+        for (const trackingRequest of trackingRequests) {
+            const html = await this.renderTemplate(trackingRequest);
+
+            // Generate subject based on number of products
+            let subject: string;
+            if (trackingRequest.products.length === 1) {
+                subject = `Stock Alert: ${trackingRequest.products[0].name} is available`;
+            } else if (trackingRequest.products.length > 1) {
+                subject = `Stock Alert: ${trackingRequest.products.length} products are available`;
+            } else {
+                subject = `Stock Alert: Products availability update`;
+            }
 
             emails.push({
-                user: userRequests.user,
+                user: trackingRequest.user,
                 html,
-                text,
                 subject
             });
         }
@@ -123,24 +125,6 @@ export class EmailTemplateEngine {
         return emails;
     }
 
-    private generatePlainText(data: TrackingRequest): string {
-        return `
-Hello ${data.user.name},
-
-Stock Alert: The product you are tracking is now available for purchase.
-
-Product: ${data.product.name}
-Price: ₹${data.product.usualPrice}
-SKU: ${data.product.sku}
-
-View product: https://shop.amul.com/en/product/${data.product.alias}
-
-This is an automated notification from your product tracking service.
-
-Best regards,
-Amul Tracker Team
-        `.trim();
-    }
 }
 
 export const emailTemplateEngine = new EmailTemplateEngine();
