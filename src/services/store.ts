@@ -28,6 +28,16 @@ interface InfoResponse {
 }
 
 
+export interface ProductResponse {
+    data: Array<{
+        _id: string,
+        available: 1 | 0
+    }>
+}
+
+
+
+
 
 
 
@@ -36,6 +46,8 @@ export class StoreService {
     private cookie
     private tid
     private headers: Record<string, string>
+    private MAX_RETRIES = 3
+    private RETRY_DELAY = 1000
 
     constructor(private redisService: RedisService) {
         this.cookie = ''
@@ -92,6 +104,7 @@ export class StoreService {
             const cleanedData = data.replace(/^session\s*=\s*/, "");
 
             const info = JSON.parse(cleanedData) as InfoResponse
+
 
             if (typeof info.data.substore_id !== 'string' || info.data.substore_id.trim().length === 0) {
                 throw new Error("Failed to get substore id from session info call ")
@@ -178,9 +191,9 @@ export class StoreService {
             const subStoreId = await this.redisService.getSubStoreToSubStoreId(substoreName)
 
             if (subStoreId) {
-                await this.redisService.setPincodeData({ pincode: pincode, subStoreName: substoreName, subStoreId: subStoreId })
+                await this.redisService.setPincodeData({ pincode: pincode, subStoreName: substoreName, subStoreId: subStoreId.subStoreId })
                 return {
-                    substoreId: subStoreId,
+                    substoreId: subStoreId?.subStoreId,
                     substoreName: substoreName
                 }
             }
@@ -188,7 +201,7 @@ export class StoreService {
             const substoreId = await this.makeInfoCall()
 
             await Promise.all([
-                this.redisService.setSubStoreData({ subStoreName: substoreName, subStoreId: substoreId }),
+                this.redisService.setSubStoreData({ subStoreName: substoreName, subStoreId: substoreId, cookies: this.cookie }),
                 this.redisService.setPincodeData({ pincode: pincode, subStoreName: substoreName, subStoreId: substoreId })
             ])
 
@@ -239,6 +252,68 @@ export class StoreService {
         }
         const newCookie = this.getCookiesFromHeaders(response.headers)
         this.cookie = newCookie
+    }
+
+
+    async getProducts(substoreId: string, cookies: string) {
+        let response = null
+        const tid = await this.getTid()
+        try {
+            const url = `https://shop.amul.com/api/1/entity/ms.products?fields[name]=1&fields[brand]=1&fields[categories]=1&fields[collections]=1&fields[alias]=1&fields[sku]=1&fields[price]=1&fields[compare_price]=1&fields[original_price]=1&fields[images]=1&fields[metafields]=1&fields[discounts]=1&fields[catalog_only]=1&fields[is_catalog]=1&fields[seller]=1&fields[available]=1&fields[inventory_quantity]=1&fields[net_quantity]=1&fields[num_reviews]=1&fields[avg_rating]=1&fields[inventory_low_stock_quantity]=1&fields[inventory_allow_out_of_stock]=1&fields[default_variant]=1&fields[variants]=1&fields[lp_seller_ids]=1&filters[0][field]=categories&filters[0][value][0]=protein&filters[0][operator]=in&filters[0][original]=1&facets=true&facetgroup=default_category_facet&limit=24&total=1&start=0&cdc=1m&substore=${substoreId}`
+            response = await fetch(url, {
+                headers: {
+                    'cookie': cookies,
+                    ...this.headers,
+                    'tid': tid
+                }
+            })
+
+            this.tid = tid
+            const data = await response.json() as ProductResponse
+            const products = data.data.map((product) => ({
+                _id: product._id,
+                available: product.available === 1
+            }))
+
+            return {
+                products,
+                cookie: this.getCookiesFromHeaders(response.headers)
+            }
+        }
+        catch (error) {
+            if (response) {
+                const newCookie = this.getCookiesFromHeaders(response.headers)
+                return {
+                    products: [],
+                    cookie: newCookie
+                }
+            }
+            throw new Error("Failed to get products ")
+        }
+    }
+
+    async retryGetProducts(substoreId: string, cookies: string) {
+        let retries = 0
+        let errorMessage = null
+        let cookie = cookies
+        while (retries < this.MAX_RETRIES) {
+            try {
+                const { products, cookie: newCookie } = await this.getProducts(substoreId, cookie)
+                if (products.length > 0) {
+                    await this.redisService.setSubStoreCookies({ subStoreId: substoreId, cookies: newCookie })
+                    return products
+                } else {
+                    cookie = newCookie
+                    console.log("updated cookie ", substoreId)
+                    retries++
+                    await new Promise(resolve => setTimeout(resolve, this.RETRY_DELAY))
+                }
+            } catch (error) {
+                errorMessage = error
+            }
+        }
+
+        return []
     }
 
 }

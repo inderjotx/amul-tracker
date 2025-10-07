@@ -103,14 +103,14 @@ export class EmailTemplateEngine {
 
         const html = await this.renderTemplate(trackingRequest);
 
-        // Generate subject based on number of products
+        // Generate a subject line that is clear and not spammy
         let subject: string;
         if (trackingRequest.products.length === 1) {
-            subject = `Stock Alert: ${trackingRequest.products[0].name} is available`;
+            subject = `Product Back in Stock: ${trackingRequest.products[0].name} is now available`;
         } else if (trackingRequest.products.length > 1) {
-            subject = `Stock Alert: ${trackingRequest.products.length} products are available`;
+            subject = `Product Back in Stock: ${trackingRequest.products.length} products you track are now in stock`;
         } else {
-            subject = `Stock Alert: Products availability update`;
+            subject = `Product Back in Stock`;
         }
 
 

@@ -11,8 +11,16 @@ type PincodeData = Record<Pincode, {
     subStoreId: SubStoreId
 }>
 
-type SubStoreData = Record<SubStoreName, SubStoreId>
+type SubStoreData = Record<SubStoreName, {
+    subStoreId: SubStoreId
+    cookies?: string
+} | string>
 
+
+type SubStoreDataObject = Record<SubStoreName, {
+    subStoreId: SubStoreId
+    cookies?: string
+}>
 
 export class RedisService {
 
@@ -57,14 +65,31 @@ export class RedisService {
     }
 
 
-    async setSubStoreData({ subStoreName, subStoreId }: { subStoreName: string, subStoreId: string }) {
+    async setSubStoreData({ subStoreName, subStoreId, cookies }: { subStoreName: string, subStoreId: string, cookies: string }) {
         const data = await this.getSubStoreData() ?? {}
         console.log("storing sub store data", data)
 
-        data[subStoreName] = subStoreId
+        data[subStoreName] = {
+            subStoreId,
+            cookies: cookies,
+        }
+
         await this.set(this.subStoreNameToSubStoreIdKey, JSON.stringify(data))
     }
 
+
+    async setSubStoreCookies({ subStoreId, cookies }: { subStoreId: string, cookies: string }) {
+        const data = await this.getSubStoreData() ?? {}
+
+        Object.keys(data).forEach((key) => {
+            if (data[key]?.subStoreId === subStoreId) {
+                data[key].cookies = cookies
+            }
+        })
+
+        await this.set(this.subStoreNameToSubStoreIdKey, JSON.stringify(data))
+
+    }
 
 
     async getPincodeData() {
@@ -82,8 +107,49 @@ export class RedisService {
         if (!data) {
             return null
         }
-        const parsedData = JSON.parse(data) as SubStoreData
+
+        const parsedData = await this.safeParseSubStoreData(data)
         return parsedData
+    }
+
+
+    async safeParseSubStoreData(data: string) {
+
+        try {
+            const parsedData = JSON.parse(data) as SubStoreData
+
+            const keys = Object.keys(parsedData)
+
+            if (typeof keys?.[0] === 'string') {
+                const firstItem = parsedData[keys?.[0]]
+
+                if (typeof firstItem === 'string') {
+                    const subStoreDataObject: SubStoreDataObject = {}
+                    keys.forEach((key) => {
+                        subStoreDataObject[key] = {
+                            subStoreId: parsedData[key] as SubStoreId,
+                            cookies: ""
+                        }
+                    })
+                    return subStoreDataObject
+                }
+                else {
+                    if (typeof firstItem === 'object') {
+                        return parsedData as SubStoreDataObject
+                    }
+                }
+                return parsedData as SubStoreDataObject
+
+            }
+
+        } catch (error) {
+            console.error(error)
+            return {} as SubStoreDataObject
+        }
+
+
+
+
     }
 
 

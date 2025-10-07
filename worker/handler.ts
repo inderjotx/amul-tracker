@@ -11,6 +11,7 @@ interface Event {
 export const handler = async (event: Event) => {
     try {
 
+        console.log("event", JSON.stringify(event, null, 2))
         for (const record of event.Records) {
             const data = JSON.parse(record.body) as { trackingRequests: TrackingRequest };
             console.log("data from queue", data);

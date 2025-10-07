@@ -1,0 +1,21 @@
+{
+    "Records": [
+        {
+            "messageId": "a2de86e3-1104-4f94-ba00-41eff83763b1",
+            "receiptHandle": "AQEB4anMO1s6ZKB/Js0DtBNlWsl+nDzXBu0QV0TQCdNvdKlR9iX26DUTUh0BUl3iAfpK9/TwEh5fSR7/vBAOrqEwyfecBKEc/SHCXcZ19/0TLhF3L7YX+U3R+My5y6zrlpRK6Jo8HFHfkXkDs1x7lD/g12RArpHmiddEae1Ar4p9MF/GUAXK76b60ijUOxuE0X+gjyfmlUZAj+M3qV5aBGeoNG39lBRYtV/jITAHIrQcS0wGjdhug2zxxVIywjIbWdwOTPYBBNFT6XpcmA+YU7vvRIzKc0tyqsaZi55reWnSu0nhU7m1qi1t2MPsJSFzG/y8ALlXFUrjRBixMGCEm4/68dwo4Odv/C1aJUcq8n926lxbFA5oI0h+hNJUpY8Ah406PpN2ht0lZIrIk4LitqFcIA==",
+            "body": "{\"trackingRequests\":{\"user\":{\"_id\":\"68e3f8b7d99a491d77b1e7af\",\"name\":\"Inderjot Singh\",\"email\":\"inderjotsingh141x@gmail.com\",\"emailVerified\":true,\"image\":\"https://lh3.googleusercontent.com/a/ACg8ocJTTpiYQL2yNyCtO4KChF8nHrTgyo9QLEFZcZu1OQ_sKsRleg=s96-c\",\"createdAt\":\"2025-10-06T17:13:27.173Z\",\"updatedAt\":\"2025-10-06T17:13:27.173Z\",\"pincode\":\"144002\",\"substoreId\":\"66505ff3998183e1b1935d0e\",\"substoreName\":\"punjab\"},\"products\":[{\"_id\":\"685ba00c16e8062ba38a6c42\",\"alias\":\"amul-kool-protein-milkshake-or-vanilla-180-ml-or-pack-of-8\",\"sku\":\"DBDCP45_02\",\"name\":\"Amul Kool Protein Milkshake | Vanilla, 180 mL | Pack of 8\",\"description\":\"\",\"image\":\"https://shop.amul.com/s/62fa94df8c13af2e242eba16/685cd6ff0b6d723bb83fa8fd/01-hero-image-multipack-amul-kool-protein-vanilla-180ml.png\",\"usualPrice\":320},{\"_id\":\"685b93d2d9ca675354b355b3\",\"alias\":\"amul-kool-protein-milkshake-or-vanilla-180-ml-or-pack-of-30\",\"sku\":\"DBDCP45_01\",\"name\":\"Amul Kool Protein Milkshake | Vanilla, 180 mL | Pack of 30\",\"description\":\"\",\"image\":\"https://shop.amul.com/s/62fa94df8c13af2e242eba16/685b92a3b80ba4c402aa7855/01-hero-image-multipack_amul-kool-protein-vanilla-180ml.png\",\"usualPrice\":1200}]}}",
+            "attributes": {
+                "ApproximateReceiveCount": "1",
+                "SentTimestamp": "1759829652811",
+                "SenderId": "AIDAJKTPXYYAO6CI6DPKS",
+                "ApproximateFirstReceiveTimestamp": "1759829652815"
+            },
+            "messageAttributes": {},
+            "md5OfMessageAttributes": null,
+            "md5OfBody": "93e85e17624ea30f12b11f5a6f9221b5",
+            "eventSource": "aws:sqs",
+            "eventSourceARN": "arn:aws:sqs:ap-south-1:944599182924:amul-tracker-sqs",
+            "awsRegion": "ap-south-1"
+        }
+    ]
+}
